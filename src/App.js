@@ -44,16 +44,15 @@ const Portfolio = () => {
 
   const experiences = [
     {
-      title: 'Co-Founder',
-      company: 'CGWS (Come Grow With Us)',
-      location: 'Pakistan',
+      title: 'Data Annotator',
+      company: 'Motive Formerly (KeepTruckin)',
+      location: 'California,USA',
       period: 'Present',
-      type: 'Leadership',
+      type: 'Data Analyst',
       achievements: [
-        'Led data-driven growth strategies achieving 35% revenue increase',
-        'Implemented ML models for market analysis and customer segmentation',
-        'Built automated reporting systems reducing manual work by 60%',
-        'Established data governance framework improving decision-making by 40%'
+'Annotate images, videos, text, or audio with relevant tags and labels as per the project requirements.',
+'Adhere strictly to detailed guidelines to ensure consistency and quality across all data.',
+'Review and correct annotations to maintain high accuracy and reliability in labeled datasets.'
       ]
     },
     {
