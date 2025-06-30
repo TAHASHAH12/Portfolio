@@ -69,16 +69,17 @@ const Portfolio = () => {
       ]
     },
     {
-      title: 'Data Analyst Intern',
-      company: 'ACM - Association For Computing Machinery',
-      location: 'Seattle, USA',
-      period: 'Apr - Sep 2024',
+      title: 'Data Scientist',
+      company: 'White Light Digital Marketing',
+      location: 'California, USA',
+      period: 'Present',
       type: 'Research',
       achievements: [
         'Developed advanced ML algorithms improving accuracy by 15%',
         'Optimized data preprocessing pipelines reducing processing time by 20%',
         'Created interactive visualizations increasing stakeholder engagement by 25%',
-        'Published research on machine learning optimization techniques'
+        'Published research on machine learning optimization techniques',
+        'Collaborated with cross-functional teams to drive business growth through data-driven insights'
       ]
     },
     {
