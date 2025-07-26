@@ -1,0 +1,11 @@
+{
+    "$schema": "https://openapi.vercel.sh/vercel.json",
+    "name": "taha-shah-portfolio",
+    "version": 2,
+    "buildCommand": "npm run build",
+    "outputDirectory": "build",
+    "framework": "create-react-app",
+    "installCommand": "npm install",
+    "devCommand": "npm start"
+  }
+  
