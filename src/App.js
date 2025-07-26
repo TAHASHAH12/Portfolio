@@ -1,5 +1,9 @@
 import React, { useState, useEffect } from 'react';
-import { ChevronDown, Mail, Phone, MapPin, Github, Linkedin, Code, Database, Brain, TrendingUp, Calendar, ArrowRight, ExternalLink, Download, Play, Pause, Star, GitFork } from 'lucide-react';
+import {
+  ChevronDown, Mail, Phone, MapPin, Github, Linkedin, Code, Database,
+  Brain, TrendingUp, Calendar, ArrowRight, ExternalLink, Download,
+  Play, Pause, Star, GitFork, AlertCircle, RefreshCw
+} from 'lucide-react';
 
 const Portfolio = () => {
   const [activeSection, setActiveSection] = useState('home');
@@ -13,10 +17,10 @@ const Portfolio = () => {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
   const [apiStats, setApiStats] = useState({ remaining: null, limit: null });
-  
+
   const roles = [
     'Data Scientist',
-    'Machine Learning Engineer', 
+    'Machine Learning Engineer',
     'AI/ML Specialist',
     'Data Analytics Expert',
     'Business Intelligence Developer'
@@ -30,7 +34,7 @@ const Portfolio = () => {
     },
     'Data Science': {
       items: ['Python', 'R', 'Statistics', 'Predictive Modeling', 'Feature Engineering', 'Data Mining'],
-      color: 'from-green-500 to-teal-600', 
+      color: 'from-green-500 to-teal-600',
       icon: TrendingUp
     },
     'Data Engineering': {
@@ -81,8 +85,7 @@ const Portfolio = () => {
         'Developed advanced ML algorithms improving accuracy by 15%',
         'Optimized data preprocessing pipelines reducing processing time by 20%',
         'Created interactive visualizations increasing stakeholder engagement by 25%',
-        'Published research on machine learning optimization techniques',
-        'Collaborated with cross-functional teams to drive business growth through data-driven insights'
+        'Published research on machine learning optimization techniques'
       ]
     },
     {
@@ -94,106 +97,200 @@ const Portfolio = () => {
       achievements: [
         'Applied data analytics to optimize operational processes',
         'Developed predictive maintenance models reducing costs by 10%',
-        'Created automated inventory management system using ML',
-        'Implemented process mining techniques for workflow optimization'
+        'Created automated inventory management system using ML'
       ]
     }
   ];
 
-  // GitHub API integration
-  const GITHUB_USERNAME = process.env.REACT_APP_GITHUB_USERNAME || 'TAHASHAH12';
-  const GITHUB_API_URL = `https://api.github.com/users/${GITHUB_USERNAME}/repos`;
+  // Fallback projects in case GitHub API fails
+  const fallbackProjects = [
+    {
+      id: 'fallback-1',
+      title: 'Predictive Analytics Dashboard',
+      description: 'Real-time ML dashboard for business forecasting with advanced visualization capabilities',
+      html_url: 'https://github.com/TAHASHAH12',
+      homepage: null,
+      language: 'Python',
+      stars: 15,
+      forks: 3,
+      topics: ['machine-learning', 'python', 'dashboard'],
+      updated_at: '2024-12-01T00:00:00Z',
+      category: 'ml'
+    },
+    {
+      id: 'fallback-2',
+      title: 'Customer Segmentation Engine',
+      description: 'ML-powered customer segmentation system using clustering algorithms',
+      html_url: 'https://github.com/TAHASHAH12',
+      homepage: null,
+      language: 'Python',
+      stars: 22,
+      forks: 7,
+      topics: ['data-science', 'clustering', 'marketing'],
+      updated_at: '2024-11-15T00:00:00Z',
+      category: 'data-science'
+    },
+    {
+      id: 'fallback-3',
+      title: 'Neural Network Optimizer',
+      description: 'Custom neural network architecture with performance optimizations',
+      html_url: 'https://github.com/TAHASHAH12',
+      homepage: null,
+      language: 'Python',
+      stars: 31,
+      forks: 12,
+      topics: ['neural-networks', 'optimization', 'deep-learning'],
+      updated_at: '2024-11-01T00:00:00Z',
+      category: 'ml'
+    },
+    {
+      id: 'fallback-4',
+      title: 'Data Pipeline Automation',
+      description: 'Automated ETL pipeline for processing large-scale datasets',
+      html_url: 'https://github.com/TAHASHAH12',
+      homepage: null,
+      language: 'Python',
+      stars: 18,
+      forks: 5,
+      topics: ['etl', 'data-engineering', 'spark'],
+      updated_at: '2024-10-20T00:00:00Z',
+      category: 'data-science'
+    },
+    {
+      id: 'fallback-5',
+      title: 'Portfolio Website',
+      description: 'Personal portfolio website built with React and Tailwind CSS',
+      html_url: 'https://github.com/TAHASHAH12/Portfolio',
+      homepage: 'https://tahashah-portfolio.vercel.app',
+      language: 'JavaScript',
+      stars: 8,
+      forks: 2,
+      topics: ['react', 'portfolio', 'tailwind'],
+      updated_at: '2024-12-15T00:00:00Z',
+      category: 'web-dev'
+    }
+  ];
 
-  // Fetch GitHub repositories
-  useEffect(() => {
-    const fetchGithubProjects = async () => {
-      try {
-        setLoading(true);
-        
-        const headers = {
-          'Accept': 'application/vnd.github.v3+json',
-          'User-Agent': 'Portfolio-App'
-        };
-        
-        if (process.env.REACT_APP_GITHUB_TOKEN) {
-          headers.Authorization = `token ${process.env.REACT_APP_GITHUB_TOKEN}`;
-        }
-        
-        const response = await fetch(`${GITHUB_API_URL}?sort=updated&per_page=30&type=owner`, {
-          headers,
-          method: 'GET'
-        });
-        
-        const rateLimitRemaining = response.headers.get('X-RateLimit-Remaining');
-        const rateLimitLimit = response.headers.get('X-RateLimit-Limit');
-        
-        setApiStats({
-          remaining: rateLimitRemaining,
-          limit: rateLimitLimit
-        });
-        
-        console.log(`GitHub API Rate Limit: ${rateLimitRemaining}/${rateLimitLimit}`);
-        
-        if (!response.ok) {
-          if (response.status === 403) {
-            throw new Error('GitHub API rate limit exceeded. Please try again later.');
-          } else if (response.status === 401) {
-            throw new Error('GitHub API authentication failed. Please check your token.');
-          } else {
-            throw new Error(`GitHub API error: ${response.status} ${response.statusText}`);
+  // GitHub API configuration
+  const GITHUB_USERNAME = process.env.REACT_APP_GITHUB_USERNAME || 'TAHASHAH12';
+  const GITHUB_TOKEN = process.env.REACT_APP_GITHUB_TOKEN;
+
+  // Enhanced GitHub fetch with proper error handling
+  const fetchGithubProjects = async () => {
+    try {
+      setLoading(true);
+      setError(null);
+
+      // Check if token exists
+      if (!GITHUB_TOKEN) {
+        console.warn('No GitHub token found, using fallback projects');
+        setGithubProjects(fallbackProjects);
+        setError('GitHub token not configured - showing sample projects');
+        setLoading(false);
+        return;
+      }
+
+      // Validate token format
+      if (!GITHUB_TOKEN.startsWith('ghp_') && !GITHUB_TOKEN.startsWith('github_pat_')) {
+        console.error('Invalid GitHub token format');
+        setGithubProjects(fallbackProjects);
+        setError('Invalid GitHub token format - using sample projects');
+        setLoading(false);
+        return;
+      }
+
+      console.log('Fetching GitHub projects...');
+
+      const response = await fetch(
+        `https://api.github.com/users/${GITHUB_USERNAME}/repos?sort=updated&per_page=20&type=owner`,
+        {
+          headers: {
+            'Accept': 'application/vnd.github.v3+json',
+            'Authorization': `Bearer ${GITHUB_TOKEN}`,
+            'User-Agent': 'Portfolio-App'
           }
         }
-        
-        const repos = await response.json();
-        
-        const processedProjects = repos
-          .filter(repo => {
-            return !repo.fork && 
-                   !repo.archived && 
-                   repo.description && 
-                   repo.description.trim() !== '' &&
-                   !repo.name.includes('.github.io');
-          })
-          .slice(0, 15)
-          .map(repo => ({
-            id: repo.id,
-            title: repo.name
-              .replace(/-/g, ' ')
-              .replace(/_/g, ' ')
-              .replace(/\b\w/g, l => l.toUpperCase()),
-            name: repo.name,
-            description: repo.description,
-            html_url: repo.html_url,
-            homepage: repo.homepage,
-            language: repo.language,
-            stars: repo.stargazers_count,
-            forks: repo.forks_count,
-            watchers: repo.watchers_count,
-            updated_at: repo.updated_at,
-            created_at: repo.created_at,
-            topics: repo.topics || [],
-            size: repo.size,
-            license: repo.license?.name || null,
-            category: categorizeProject(repo.name, repo.description, repo.topics, repo.language),
-            isPrivate: repo.private
-          }))
-          .sort((a, b) => new Date(b.updated_at) - new Date(a.updated_at));
+      );
 
-        setGithubProjects(processedProjects);
-        setError(null);
-        console.log(`Successfully fetched ${processedProjects.length} repositories`);
-        
-      } catch (err) {
-        console.error('Error fetching GitHub projects:', err);
-        setError(err.message || 'Failed to load projects from GitHub');
-        setGithubProjects([]);
-      } finally {
-        setLoading(false);
+      // Log rate limit info
+      const rateLimitRemaining = response.headers.get('X-RateLimit-Remaining');
+      const rateLimitLimit = response.headers.get('X-RateLimit-Limit');
+
+      setApiStats({
+        remaining: rateLimitRemaining,
+        limit: rateLimitLimit
+      });
+
+      console.log(`GitHub API Rate Limit: ${rateLimitRemaining}/${rateLimitLimit}`);
+
+      if (!response.ok) {
+        let errorMessage = `GitHub API error: ${response.status} ${response.statusText}`;
+
+        if (response.status === 401) {
+          errorMessage = 'GitHub API authentication failed. Please check your token.';
+        } else if (response.status === 403) {
+          errorMessage = response.headers.get('X-RateLimit-Remaining') === '0'
+            ? 'GitHub API rate limit exceeded. Please try again later.'
+            : 'GitHub API access forbidden. Please check your token permissions.';
+        } else if (response.status === 404) {
+          errorMessage = `GitHub user '${GITHUB_USERNAME}' not found.`;
+        }
+
+        throw new Error(errorMessage);
       }
-    };
 
-    fetchGithubProjects();
-  }, [GITHUB_USERNAME]);
+      const repos = await response.json();
+
+      if (!Array.isArray(repos)) {
+        throw new Error('Invalid response format from GitHub API');
+      }
+
+      // Process repositories
+      const processedProjects = repos
+        .filter(repo => {
+          return !repo.fork &&
+            !repo.archived &&
+            repo.description &&
+            repo.description.trim() !== '' &&
+            !repo.name.includes('.github.io');
+        })
+        .slice(0, 12)
+        .map(repo => ({
+          id: repo.id,
+          title: repo.name
+            .replace(/-/g, ' ')
+            .replace(/_/g, ' ')
+            .replace(/\b\w/g, l => l.toUpperCase()),
+          name: repo.name,
+          description: repo.description,
+          html_url: repo.html_url,
+          homepage: repo.homepage,
+          language: repo.language,
+          stars: repo.stargazers_count,
+          forks: repo.forks_count,
+          topics: repo.topics || [],
+          updated_at: repo.updated_at,
+          category: categorizeProject(repo.name, repo.description, repo.topics, repo.language)
+        }))
+        .sort((a, b) => new Date(b.updated_at) - new Date(a.updated_at));
+
+      if (processedProjects.length === 0) {
+        console.warn('No projects found, using fallback projects');
+        setGithubProjects(fallbackProjects);
+        setError('No suitable repositories found - showing sample projects');
+      } else {
+        setGithubProjects(processedProjects);
+        console.log(`Successfully fetched ${processedProjects.length} repositories`);
+      }
+
+    } catch (err) {
+      console.error('Error fetching GitHub projects:', err);
+      setGithubProjects(fallbackProjects);
+      setError(err.message || 'Failed to load projects from GitHub - showing sample projects');
+    } finally {
+      setLoading(false);
+    }
+  };
 
   // Categorize projects
   const categorizeProject = (name, description, topics, language) => {
@@ -201,28 +298,23 @@ const Portfolio = () => {
     const allTopics = topics.join(' ').toLowerCase();
     const searchText = `${nameAndDesc} ${allTopics}`.toLowerCase();
 
-    if (searchText.match(/machine learning|ml|neural network|deep learning|tensorflow|pytorch|sklearn|ai|artificial intelligence|computer vision|nlp|natural language|model|algorithm/)) {
+    if (searchText.match(/machine learning|ml|neural network|deep learning|tensorflow|pytorch|sklearn|ai|artificial intelligence|computer vision|nlp/)) {
       return 'ml';
     }
-    
-    if (searchText.match(/data science|analytics|visualization|pandas|numpy|matplotlib|seaborn|jupyter|analysis|statistics|predictive|dashboard|etl|pipeline/)) {
+
+    if (searchText.match(/data science|analytics|visualization|pandas|numpy|matplotlib|seaborn|jupyter|analysis|statistics|predictive/)) {
       return 'data-science';
     }
-    
-    if (searchText.match(/web|react|javascript|html|css|frontend|backend|api|website|portfolio|fullstack|next|vue|angular/) || 
-        language?.toLowerCase().match(/javascript|typescript|html|css|php/)) {
+
+    if (searchText.match(/web|react|javascript|html|css|frontend|backend|api|website|portfolio/) ||
+      language?.toLowerCase().match(/javascript|typescript|html|css/)) {
       return 'web-dev';
     }
-    
-    if (searchText.match(/mobile|android|ios|flutter|react native|app|kotlin|swift/) ||
-        language?.toLowerCase().match(/dart|swift|kotlin|java/)) {
-      return 'mobile';
-    }
-    
-    if (language?.toLowerCase() === 'python' || searchText.includes('python')) {
+
+    if (language?.toLowerCase() === 'python') {
       return 'python';
     }
-    
+
     return 'other';
   };
 
@@ -234,15 +326,20 @@ const Portfolio = () => {
   };
 
   // Filter projects
-  const filteredProjects = githubProjects.filter(project => 
+  const filteredProjects = githubProjects.filter(project =>
     projectFilter === 'all' || project.category === projectFilter
   );
+
+  // Fetch projects on component mount
+  useEffect(() => {
+    fetchGithubProjects();
+  }, []);
 
   // Scroll effects
   useEffect(() => {
     const handleScroll = () => {
       setIsScrolled(window.scrollY > 50);
-      
+
       const sections = ['home', 'about', 'experience', 'skills', 'projects', 'contact'];
       const currentSection = sections.find(section => {
         const element = document.getElementById(section);
@@ -252,7 +349,7 @@ const Portfolio = () => {
         }
         return false;
       });
-      
+
       if (currentSection) {
         setActiveSection(currentSection);
       }
@@ -284,67 +381,15 @@ const Portfolio = () => {
     }
   }, [darkMode]);
 
-  // Particle animation
-  useEffect(() => {
-    if (!particlesEnabled) return;
-    
-    const canvas = document.getElementById('particles');
-    if (!canvas) return;
-    
-    const ctx = canvas.getContext('2d');
-    canvas.width = window.innerWidth;
-    canvas.height = window.innerHeight;
-    
-    const particles = [];
-    for (let i = 0; i < 50; i++) {
-      particles.push({
-        x: Math.random() * canvas.width,
-        y: Math.random() * canvas.height,
-        vx: (Math.random() - 0.5) * 2,
-        vy: (Math.random() - 0.5) * 2,
-        size: Math.random() * 3 + 1
-      });
-    }
-    
-    const animate = () => {
-      ctx.clearRect(0, 0, canvas.width, canvas.height);
-      
-      particles.forEach(particle => {
-        particle.x += particle.vx;
-        particle.y += particle.vy;
-        
-        if (particle.x < 0 || particle.x > canvas.width) particle.vx *= -1;
-        if (particle.y < 0 || particle.y > canvas.height) particle.vy *= -1;
-        
-        ctx.beginPath();
-        ctx.arc(particle.x, particle.y, particle.size, 0, Math.PI * 2);
-        ctx.fillStyle = darkMode ? 'rgba(255, 255, 255, 0.1)' : 'rgba(102, 126, 234, 0.1)';
-        ctx.fill();
-      });
-      
-      requestAnimationFrame(animate);
-    };
-    
-    animate();
-    
-    const handleResize = () => {
-      canvas.width = window.innerWidth;
-      canvas.height = window.innerHeight;
-    };
-    
-    window.addEventListener('resize', handleResize);
-    return () => window.removeEventListener('resize', handleResize);
-  }, [particlesEnabled, darkMode]);
-
   const scrollToSection = (sectionId) => {
     document.getElementById(sectionId)?.scrollIntoView({ behavior: 'smooth' });
   };
 
   const formatDate = (dateString) => {
     const date = new Date(dateString);
-    return date.toLocaleDateString('en-US', { 
-      year: 'numeric', 
-      month: 'short' 
+    return date.toLocaleDateString('en-US', {
+      year: 'numeric',
+      month: 'short'
     });
   };
 
@@ -355,34 +400,19 @@ const Portfolio = () => {
       'Python': '#3572A5',
       'Java': '#b07219',
       'C++': '#f34b7d',
-      'C': '#555555',
       'HTML': '#e34c26',
       'CSS': '#1563e0',
-      'React': '#61dafb',
-      'Vue': '#4FC08D',
-      'PHP': '#4F5D95',
-      'Ruby': '#cc342d',
-      'Go': '#00ADD8',
-      'Rust': '#dea584',
-      'Swift': '#ffac45',
-      'Kotlin': '#A97BFF',
-      'Dart': '#00B4AB',
-      'Jupyter Notebook': '#DA5B0B'
+      'R': '#198CE7'
     };
     return colors[language] || '#8b949e';
   };
 
+  // Component definitions
   const SkillCard = ({ category, data, index }) => {
-    const [isHovered, setIsHovered] = useState(false);
     const Icon = data.icon;
-    
+
     return (
-      <div 
-        className={`group relative p-6 rounded-2xl bg-gradient-to-br ${data.color} transform transition-all duration-500 hover:scale-105 hover:rotate-1 cursor-pointer`}
-        style={{ animationDelay: `${index * 100}ms` }}
-        onMouseEnter={() => setIsHovered(true)}
-        onMouseLeave={() => setIsHovered(false)}
-      >
+      <div className={`group relative p-6 rounded-2xl bg-gradient-to-br ${data.color} transform transition-all duration-500 hover:scale-105 hover:rotate-1 cursor-pointer`}>
         <div className="absolute inset-0 bg-black/20 rounded-2xl opacity-0 group-hover:opacity-100 transition-opacity duration-300" />
         <div className="relative z-10">
           <div className="flex items-center mb-4">
@@ -391,10 +421,9 @@ const Portfolio = () => {
           </div>
           <div className="flex flex-wrap gap-2">
             {data.items.map((skill, idx) => (
-              <span 
+              <span
                 key={idx}
-                className={`px-3 py-1 bg-white/20 backdrop-blur-sm rounded-full text-sm text-white font-medium transition-all duration-300 ${isHovered ? 'scale-110' : ''}`}
-                style={{ transitionDelay: `${idx * 50}ms` }}
+                className="px-3 py-1 bg-white/20 backdrop-blur-sm rounded-full text-sm text-white font-medium transition-all duration-300 group-hover:scale-110"
               >
                 {skill}
               </span>
@@ -405,7 +434,7 @@ const Portfolio = () => {
     );
   };
 
-  const ExperienceCard = ({ exp, index }) => (
+  const ExperienceCard = ({ exp }) => (
     <div className="relative p-6 bg-white dark:bg-gray-800 rounded-2xl shadow-xl hover:shadow-2xl transition-all duration-500 transform hover:scale-105 border-l-4 border-blue-500">
       <div className="flex justify-between items-start mb-4">
         <div>
@@ -441,7 +470,7 @@ const Portfolio = () => {
     </div>
   );
 
-  const GitHubProjectCard = ({ project, index }) => (
+  const ProjectCard = ({ project }) => (
     <div className="group relative bg-white dark:bg-gray-800 rounded-2xl overflow-hidden shadow-xl hover:shadow-2xl transition-all duration-500 transform hover:scale-105">
       <div className="absolute top-0 left-0 w-full h-1 bg-gradient-to-r from-blue-500 to-purple-600"></div>
       <div className="p-6">
@@ -460,43 +489,43 @@ const Portfolio = () => {
             </a>
           </div>
         </div>
-        
+
         <p className="text-gray-600 dark:text-gray-300 mb-4 text-sm leading-relaxed">
           {project.description}
         </p>
-        
+
         <div className="flex flex-wrap gap-2 mb-4">
           {project.language && (
-            <span 
+            <span
               className="px-2 py-1 rounded text-xs font-medium flex items-center"
-              style={{ 
+              style={{
                 backgroundColor: darkMode ? 'rgba(255, 255, 255, 0.1)' : 'rgba(0, 0, 0, 0.1)',
                 color: getLanguageColor(project.language)
               }}
             >
-              <span 
+              <span
                 className="w-2 h-2 rounded-full mr-1"
                 style={{ backgroundColor: getLanguageColor(project.language) }}
               ></span>
               {project.language}
             </span>
           )}
-          {project.topics.slice(0, 3).map((topic, idx) => (
+          {project.topics && project.topics.slice(0, 3).map((topic, idx) => (
             <span key={idx} className="px-2 py-1 bg-blue-100 dark:bg-blue-900 text-blue-800 dark:text-blue-200 rounded text-xs font-medium">
               {topic}
             </span>
           ))}
         </div>
-        
+
         <div className="flex justify-between items-center text-sm">
           <div className="flex space-x-4">
             <div className="flex items-center text-gray-500 dark:text-gray-400">
               <Star className="h-4 w-4 mr-1" />
-              {project.stars}
+              {project.stars || 0}
             </div>
             <div className="flex items-center text-gray-500 dark:text-gray-400">
               <GitFork className="h-4 w-4 mr-1" />
-              {project.forks}
+              {project.forks || 0}
             </div>
           </div>
           <div className="text-xs text-gray-400 dark:text-gray-500">
@@ -521,35 +550,33 @@ const Portfolio = () => {
 
   return (
     <div className={`min-h-screen transition-colors duration-300 ${darkMode ? 'dark bg-gray-900' : 'bg-gray-50'}`}>
-      
+
       {/* Navigation */}
-      <nav className={`fixed top-0 w-full z-50 transition-all duration-300 ${
-        isScrolled 
-          ? 'bg-white/90 dark:bg-gray-900/90 backdrop-blur-md shadow-lg' 
-          : 'bg-transparent'
-      }`}>
+      <nav className={`fixed top-0 w-full z-50 transition-all duration-300 ${isScrolled
+        ? 'bg-white/90 dark:bg-gray-900/90 backdrop-blur-md shadow-lg'
+        : 'bg-transparent'
+        }`}>
         <div className="container mx-auto px-6 py-4">
           <div className="flex justify-between items-center">
             <div className="text-2xl font-bold text-gradient">
               Taha Shah
             </div>
-            
+
             <div className="hidden md:flex space-x-8">
               {['home', 'about', 'experience', 'skills', 'projects', 'contact'].map((item) => (
                 <button
                   key={item}
                   onClick={() => scrollToSection(item)}
-                  className={`capitalize font-medium transition-all duration-300 hover:text-blue-600 ${
-                    activeSection === item 
-                      ? 'text-blue-600 border-b-2 border-blue-600' 
-                      : 'text-gray-700 dark:text-gray-300'
-                  }`}
+                  className={`capitalize font-medium transition-all duration-300 hover:text-blue-600 ${activeSection === item
+                    ? 'text-blue-600 border-b-2 border-blue-600'
+                    : 'text-gray-700 dark:text-gray-300'
+                    }`}
                 >
                   {item}
                 </button>
               ))}
             </div>
-            
+
             <div className="flex items-center space-x-4">
               <button
                 onClick={() => setParticlesEnabled(!particlesEnabled)}
@@ -568,43 +595,28 @@ const Portfolio = () => {
         </div>
       </nav>
 
-      {/* API Status (Development only) */}
-      {process.env.NODE_ENV === 'development' && apiStats.remaining && (
-        <div className="fixed top-20 right-4 z-40 bg-black text-white p-2 rounded text-xs">
-          API: {apiStats.remaining}/{apiStats.limit}
-        </div>
-      )}
-
-      {/* Particle Background */}
-      <canvas
-        id="particles"
-        className="fixed inset-0 pointer-events-none z-0"
-        style={{ opacity: particlesEnabled ? 1 : 0 }}
-      />
-
       {/* Hero Section */}
       <section id="home" className="relative min-h-screen flex items-center justify-center overflow-hidden">
         <div className="absolute inset-0 bg-gradient-to-br from-blue-900/20 via-purple-900/20 to-pink-900/20" />
-        
+
         <div className="relative z-10 text-center px-6 max-w-4xl mx-auto">
           <div className="mb-8">
             <h1 className="text-5xl md:text-7xl font-bold text-gray-900 dark:text-white mb-6 animate-fade-in">
               Hi, I'm <span className="text-gradient">Taha Shah</span>
             </h1>
-            
+
             <div className="text-2xl md:text-3xl font-semibold text-gray-700 dark:text-gray-300 mb-6 h-12 flex items-center justify-center">
               <span className={`transition-all duration-500 ${isTyping ? 'opacity-100' : 'opacity-0'}`}>
                 {roles[currentRole]}
               </span>
             </div>
-            
+
             <p className="text-lg text-gray-600 dark:text-gray-400 mb-8 max-w-2xl mx-auto leading-relaxed">
-              Passionate about transforming data into actionable insights through advanced machine learning, 
-              statistical analysis, and innovative AI solutions. Bachelor's Degree in Computer Science from FAST NUCES 
-              while building the future of data-driven decision making.
+              Passionate about transforming data into actionable insights through advanced machine learning,
+              statistical analysis, and innovative AI solutions. Bachelor's Degree in Computer Science from FAST NUCES.
             </p>
           </div>
-          
+
           <div className="flex flex-col sm:flex-row gap-4 justify-center items-center mb-12">
             <button
               onClick={() => scrollToSection('projects')}
@@ -631,7 +643,7 @@ const Portfolio = () => {
               </button>
             </a>
           </div>
-          
+
           <div className="flex justify-center space-x-6">
             <a href="mailto:tahashah366@gmail.com" className="p-3 bg-white/10 backdrop-blur-sm rounded-full hover:bg-white/20 transition-all duration-300 hover:scale-110">
               <Mail className="h-6 w-6 text-blue-600" />
@@ -644,7 +656,7 @@ const Portfolio = () => {
             </a>
           </div>
         </div>
-        
+
         <div className="absolute bottom-8 left-1/2 transform -translate-x-1/2 animate-bounce">
           <ChevronDown className="h-8 w-8 text-blue-600" />
         </div>
@@ -656,21 +668,21 @@ const Portfolio = () => {
           <h2 className="text-4xl font-bold text-center mb-16 text-gradient">
             About Me
           </h2>
-          
+
           <div className="grid lg:grid-cols-2 gap-12 items-center">
             <div className="space-y-6">
               <p className="text-lg text-gray-700 dark:text-gray-300 leading-relaxed">
-                I'm a passionate Data Scientist and Machine Learning Engineer with a strong foundation in 
-                computer science and hands-on experience in building scalable ML solutions. My expertise 
+                I'm a passionate Data Scientist and Machine Learning Engineer with a strong foundation in
+                computer science and hands-on experience in building scalable ML solutions. My expertise
                 spans from data preprocessing and feature engineering to deploying production-ready models.
               </p>
-              
+
               <p className="text-lg text-gray-700 dark:text-gray-300 leading-relaxed">
-                Currently pursuing my Bachelor's in Computer Science at NUCES, I've worked with leading 
-                organizations like IAL Saatchi & Saatchi and ACM, where I've consistently delivered 
+                Currently pursuing my Bachelor's in Computer Science at NUCES, I've worked with leading
+                organizations like IAL Saatchi & Saatchi, where I've consistently delivered
                 measurable improvements through innovative data science approaches.
               </p>
-              
+
               <div className="grid grid-cols-2 gap-4 mt-8">
                 <div className="text-center p-4 bg-white dark:bg-gray-800 rounded-xl shadow-lg">
                   <div className="text-3xl font-bold text-blue-600 mb-2">{githubProjects.length}+</div>
@@ -678,7 +690,7 @@ const Portfolio = () => {
                 </div>
                 <div className="text-center p-4 bg-white dark:bg-gray-800 rounded-xl shadow-lg">
                   <div className="text-3xl font-bold text-purple-600 mb-2">
-                    {githubProjects.reduce((acc, project) => acc + project.stars, 0)}
+                    {githubProjects.reduce((acc, project) => acc + (project.stars || 0), 0)}
                   </div>
                   <div className="text-sm text-gray-600 dark:text-gray-400">GitHub Stars</div>
                 </div>
@@ -692,7 +704,7 @@ const Portfolio = () => {
                 </div>
               </div>
             </div>
-            
+
             <div className="relative">
               <div className="w-full h-96 bg-gradient-to-br from-blue-500 to-purple-600 rounded-2xl relative overflow-hidden">
                 <div className="absolute inset-0 bg-black/20" />
@@ -715,10 +727,10 @@ const Portfolio = () => {
           <h2 className="text-4xl font-bold text-center mb-16 text-gradient">
             Professional Experience
           </h2>
-          
+
           <div className="grid lg:grid-cols-2 gap-8">
             {experiences.map((exp, index) => (
-              <ExperienceCard key={index} exp={exp} index={index} />
+              <ExperienceCard key={index} exp={exp} />
             ))}
           </div>
         </div>
@@ -730,7 +742,7 @@ const Portfolio = () => {
           <h2 className="text-4xl font-bold text-center mb-16 text-gradient">
             Technical Expertise
           </h2>
-          
+
           <div className="grid md:grid-cols-2 lg:grid-cols-4 gap-6">
             {Object.entries(skills).map(([category, data], index) => (
               <SkillCard key={category} category={category} data={data} index={index} />
@@ -743,69 +755,56 @@ const Portfolio = () => {
       <section id="projects" className="py-20 px-6 bg-white dark:bg-gray-800">
         <div className="container mx-auto max-w-6xl">
           <h2 className="text-4xl font-bold text-center mb-8 text-gradient">
-            Featured Projects from GitHub
+            Featured Projects
           </h2>
-          
+
+          {/* Error Display */}
           {error && (
             <div className="text-center mb-8">
-              <p className="text-lg text-red-600 dark:text-red-400">
+              <div className={`inline-flex items-center px-4 py-2 rounded-lg text-sm ${error.includes('sample') || error.includes('fallback')
+                ? 'bg-yellow-100 dark:bg-yellow-900/20 text-yellow-800 dark:text-yellow-200'
+                : 'bg-red-100 dark:bg-red-900/20 text-red-800 dark:text-red-200'
+                }`}>
+                <AlertCircle className="h-4 w-4 mr-2" />
                 {error}
-              </p>
-              <p className="text-sm mt-2 text-gray-600 dark:text-gray-400">
-                {apiStats.remaining !== null && `API Rate Limit: ${apiStats.remaining}/${apiStats.limit}`}
-              </p>
+              </div>
+              {apiStats.remaining !== null && (
+                <p className="text-xs mt-2 text-gray-500 dark:text-gray-400">
+                  API Rate Limit: {apiStats.remaining}/{apiStats.limit}
+                </p>
+              )}
             </div>
           )}
-          
-          {/* Fixed Button Container */}
+
+          {/* Filter Buttons */}
           <div className="flex justify-center mb-12">
             <div className="w-full max-w-4xl">
-              {/* Desktop Layout */}
-              <div className="hidden md:flex flex-wrap justify-center items-center gap-3 bg-gray-100 dark:bg-gray-700 rounded-full p-3">
+              <div className="flex flex-wrap justify-center items-center gap-3 bg-gray-100 dark:bg-gray-700 rounded-full p-3">
                 {getProjectCategories().map((filter) => (
                   <button
                     key={filter}
                     onClick={() => setProjectFilter(filter)}
-                    className={`px-4 py-2 rounded-full capitalize font-medium transition-all duration-300 text-sm whitespace-nowrap ${
-                      projectFilter === filter 
-                        ? 'bg-blue-600 text-white shadow-lg transform scale-105' 
-                        : 'text-gray-600 dark:text-gray-300 hover:text-blue-600 hover:bg-gray-200 dark:hover:bg-gray-600'
-                    }`}
+                    className={`px-4 py-2 rounded-full capitalize font-medium transition-all duration-300 text-sm whitespace-nowrap ${projectFilter === filter
+                      ? 'bg-blue-600 text-white shadow-lg transform scale-105'
+                      : 'text-gray-600 dark:text-gray-300 hover:text-blue-600 hover:bg-gray-200 dark:hover:bg-gray-600'
+                      }`}
                   >
                     {filter === 'all' ? 'All Projects' : filter.replace('-', ' ')}
                   </button>
                 ))}
               </div>
-              
-              {/* Mobile Layout */}
-              <div className="md:hidden">
-                <div className="flex gap-3 p-4 overflow-x-auto scrollbar-hide bg-gray-100 dark:bg-gray-700 rounded-2xl">
-                  {getProjectCategories().map((filter) => (
-                    <button
-                      key={filter}
-                      onClick={() => setProjectFilter(filter)}
-                      className={`px-4 py-2 rounded-full capitalize font-medium transition-all duration-300 text-sm whitespace-nowrap flex-shrink-0 ${
-                        projectFilter === filter 
-                          ? 'bg-blue-600 text-white shadow-lg' 
-                          : 'text-gray-600 dark:text-gray-300 hover:text-blue-600 hover:bg-gray-200 dark:hover:bg-gray-600'
-                      }`}
-                    >
-                      {filter === 'all' ? 'All Projects' : filter.replace('-', ' ')}
-                    </button>
-                  ))}
-                </div>
-              </div>
             </div>
           </div>
-          
+
+          {/* Projects Grid */}
           <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-8">
             {loading ? (
               Array.from({ length: 6 }).map((_, index) => (
                 <LoadingCard key={index} />
               ))
             ) : filteredProjects.length > 0 ? (
-              filteredProjects.map((project, index) => (
-                <GitHubProjectCard key={project.id} project={project} index={index} />
+              filteredProjects.map((project) => (
+                <ProjectCard key={project.id} project={project} />
               ))
             ) : (
               <div className="col-span-full text-center py-12">
@@ -813,10 +812,18 @@ const Portfolio = () => {
                 <p className="text-lg text-gray-600 dark:text-gray-400">
                   No projects found for the selected category.
                 </p>
+                <button
+                  onClick={fetchGithubProjects}
+                  className="mt-4 inline-flex items-center px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors"
+                >
+                  <RefreshCw className="h-4 w-4 mr-2" />
+                  Retry Loading
+                </button>
               </div>
             )}
           </div>
-          
+
+          {/* GitHub Link */}
           {!loading && githubProjects.length > 0 && (
             <div className="text-center mt-12">
               <a
@@ -838,10 +845,10 @@ const Portfolio = () => {
         <div className="container mx-auto max-w-4xl text-center">
           <h2 className="text-4xl font-bold mb-8">Let's Build Something Amazing Together</h2>
           <p className="text-xl mb-12 opacity-90">
-            Ready to transform your data into actionable insights? Let's discuss how we can leverage 
+            Ready to transform your data into actionable insights? Let's discuss how we can leverage
             machine learning and data science to solve your business challenges.
           </p>
-          
+
           <div className="grid md:grid-cols-4 gap-6 mb-12">
             <div className="p-6 bg-white/10 backdrop-blur-sm rounded-2xl hover:bg-white/20 transition-all duration-300">
               <Mail className="h-8 w-8 mx-auto mb-4" />
@@ -864,7 +871,7 @@ const Portfolio = () => {
               <p className="text-sm opacity-90">Karachi, Pakistan</p>
             </div>
           </div>
-          
+
           <button
             onClick={() => window.location.href = 'mailto:tahashah366@gmail.com'}
             className="px-12 py-4 bg-white text-blue-900 font-bold rounded-full hover:scale-105 transform transition-all duration-300 shadow-lg hover:shadow-xl"
