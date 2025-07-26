@@ -1,5 +1,5 @@
-import React, { useState, useEffect, useRef } from 'react';
-import { ChevronDown, Mail, Phone, MapPin, Github, Linkedin, Code, Database, Brain, TrendingUp, Award, Calendar, ArrowRight, ExternalLink, Download, Play, Pause } from 'lucide-react';
+import React, { useState, useEffect } from 'react';
+import { ChevronDown, Mail, Phone, MapPin, Github, Linkedin, Code, Database, Brain, TrendingUp, Calendar, ArrowRight, ExternalLink, Download, Play, Pause, Star, GitFork } from 'lucide-react';
 
 const Portfolio = () => {
   const [activeSection, setActiveSection] = useState('home');
@@ -7,9 +7,12 @@ const Portfolio = () => {
   const [currentRole, setCurrentRole] = useState(0);
   const [isTyping, setIsTyping] = useState(true);
   const [particlesEnabled, setParticlesEnabled] = useState(true);
-  const [skillAnimations, setSkillAnimations] = useState({});
   const [projectFilter, setProjectFilter] = useState('all');
   const [darkMode, setDarkMode] = useState(false);
+  const [githubProjects, setGithubProjects] = useState([]);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState(null);
+  const [apiStats, setApiStats] = useState({ remaining: null, limit: null });
   
   const roles = [
     'Data Scientist',
@@ -46,13 +49,13 @@ const Portfolio = () => {
     {
       title: 'Data Annotator',
       company: 'Motive Formerly (KeepTruckin)',
-      location: 'California,USA',
+      location: 'California, USA',
       period: 'Present',
       type: 'Data Analyst',
       achievements: [
-'Annotate images, videos, text, or audio with relevant tags and labels as per the project requirements.',
-'Adhere strictly to detailed guidelines to ensure consistency and quality across all data.',
-'Review and correct annotations to maintain high accuracy and reliability in labeled datasets.'
+        'Annotate images, videos, text, or audio with relevant tags and labels as per the project requirements.',
+        'Adhere strictly to detailed guidelines to ensure consistency and quality across all data.',
+        'Review and correct annotations to maintain high accuracy and reliability in labeled datasets.'
       ]
     },
     {
@@ -97,31 +100,145 @@ const Portfolio = () => {
     }
   ];
 
-  const projects = [
-    {
-      title: 'Predictive Analytics Dashboard',
-      category: 'ml',
-      tech: ['Python', 'TensorFlow', 'React', 'D3.js'],
-      description: 'Real-time ML dashboard for business forecasting with 95% accuracy',
-      metrics: ['95% Accuracy', '10M+ Data Points', 'Real-time Processing']
-    },
-    {
-      title: 'Customer Segmentation Engine',
-      category: 'data-science',
-      tech: ['Python', 'Scikit-learn', 'Clustering', 'SQL'],
-      description: 'ML-powered customer segmentation increasing conversion by 35%',
-      metrics: ['35% Conversion Increase', '50K+ Customers', 'Auto-Segmentation']
-    },
-    {
-      title: 'Neural Network Optimizer',
-      category: 'ml',
-      tech: ['PyTorch', 'CUDA', 'Python', 'Docker'],
-      description: 'Custom neural network architecture with 20% performance improvement',
-      metrics: ['20% Performance Boost', 'GPU Optimized', 'Production Ready']
-    }
-  ];
+  // GitHub API integration
+  const GITHUB_USERNAME = process.env.REACT_APP_GITHUB_USERNAME || 'TAHASHAH12';
+  const GITHUB_API_URL = `https://api.github.com/users/${GITHUB_USERNAME}/repos`;
 
-  // Scroll and animation effects
+  // Fetch GitHub repositories
+  useEffect(() => {
+    const fetchGithubProjects = async () => {
+      try {
+        setLoading(true);
+        
+        const headers = {
+          'Accept': 'application/vnd.github.v3+json',
+          'User-Agent': 'Portfolio-App'
+        };
+        
+        if (process.env.REACT_APP_GITHUB_TOKEN) {
+          headers.Authorization = `token ${process.env.REACT_APP_GITHUB_TOKEN}`;
+        }
+        
+        const response = await fetch(`${GITHUB_API_URL}?sort=updated&per_page=30&type=owner`, {
+          headers,
+          method: 'GET'
+        });
+        
+        const rateLimitRemaining = response.headers.get('X-RateLimit-Remaining');
+        const rateLimitLimit = response.headers.get('X-RateLimit-Limit');
+        
+        setApiStats({
+          remaining: rateLimitRemaining,
+          limit: rateLimitLimit
+        });
+        
+        console.log(`GitHub API Rate Limit: ${rateLimitRemaining}/${rateLimitLimit}`);
+        
+        if (!response.ok) {
+          if (response.status === 403) {
+            throw new Error('GitHub API rate limit exceeded. Please try again later.');
+          } else if (response.status === 401) {
+            throw new Error('GitHub API authentication failed. Please check your token.');
+          } else {
+            throw new Error(`GitHub API error: ${response.status} ${response.statusText}`);
+          }
+        }
+        
+        const repos = await response.json();
+        
+        const processedProjects = repos
+          .filter(repo => {
+            return !repo.fork && 
+                   !repo.archived && 
+                   repo.description && 
+                   repo.description.trim() !== '' &&
+                   !repo.name.includes('.github.io');
+          })
+          .slice(0, 15)
+          .map(repo => ({
+            id: repo.id,
+            title: repo.name
+              .replace(/-/g, ' ')
+              .replace(/_/g, ' ')
+              .replace(/\b\w/g, l => l.toUpperCase()),
+            name: repo.name,
+            description: repo.description,
+            html_url: repo.html_url,
+            homepage: repo.homepage,
+            language: repo.language,
+            stars: repo.stargazers_count,
+            forks: repo.forks_count,
+            watchers: repo.watchers_count,
+            updated_at: repo.updated_at,
+            created_at: repo.created_at,
+            topics: repo.topics || [],
+            size: repo.size,
+            license: repo.license?.name || null,
+            category: categorizeProject(repo.name, repo.description, repo.topics, repo.language),
+            isPrivate: repo.private
+          }))
+          .sort((a, b) => new Date(b.updated_at) - new Date(a.updated_at));
+
+        setGithubProjects(processedProjects);
+        setError(null);
+        console.log(`Successfully fetched ${processedProjects.length} repositories`);
+        
+      } catch (err) {
+        console.error('Error fetching GitHub projects:', err);
+        setError(err.message || 'Failed to load projects from GitHub');
+        setGithubProjects([]);
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    fetchGithubProjects();
+  }, [GITHUB_USERNAME]);
+
+  // Categorize projects
+  const categorizeProject = (name, description, topics, language) => {
+    const nameAndDesc = `${name} ${description}`.toLowerCase();
+    const allTopics = topics.join(' ').toLowerCase();
+    const searchText = `${nameAndDesc} ${allTopics}`.toLowerCase();
+
+    if (searchText.match(/machine learning|ml|neural network|deep learning|tensorflow|pytorch|sklearn|ai|artificial intelligence|computer vision|nlp|natural language|model|algorithm/)) {
+      return 'ml';
+    }
+    
+    if (searchText.match(/data science|analytics|visualization|pandas|numpy|matplotlib|seaborn|jupyter|analysis|statistics|predictive|dashboard|etl|pipeline/)) {
+      return 'data-science';
+    }
+    
+    if (searchText.match(/web|react|javascript|html|css|frontend|backend|api|website|portfolio|fullstack|next|vue|angular/) || 
+        language?.toLowerCase().match(/javascript|typescript|html|css|php/)) {
+      return 'web-dev';
+    }
+    
+    if (searchText.match(/mobile|android|ios|flutter|react native|app|kotlin|swift/) ||
+        language?.toLowerCase().match(/dart|swift|kotlin|java/)) {
+      return 'mobile';
+    }
+    
+    if (language?.toLowerCase() === 'python' || searchText.includes('python')) {
+      return 'python';
+    }
+    
+    return 'other';
+  };
+
+  // Get unique categories
+  const getProjectCategories = () => {
+    const categories = ['all'];
+    const uniqueCategories = [...new Set(githubProjects.map(project => project.category))];
+    return [...categories, ...uniqueCategories.sort()];
+  };
+
+  // Filter projects
+  const filteredProjects = githubProjects.filter(project => 
+    projectFilter === 'all' || project.category === projectFilter
+  );
+
+  // Scroll effects
   useEffect(() => {
     const handleScroll = () => {
       setIsScrolled(window.scrollY > 50);
@@ -145,7 +262,7 @@ const Portfolio = () => {
     return () => window.removeEventListener('scroll', handleScroll);
   }, []);
 
-  // Role rotation effect
+  // Role rotation
   useEffect(() => {
     const interval = setInterval(() => {
       setIsTyping(false);
@@ -156,7 +273,16 @@ const Portfolio = () => {
     }, 3000);
 
     return () => clearInterval(interval);
-  }, []);
+  }, [roles.length]);
+
+  // Dark mode effect
+  useEffect(() => {
+    if (darkMode) {
+      document.documentElement.classList.add('dark');
+    } else {
+      document.documentElement.classList.remove('dark');
+    }
+  }, [darkMode]);
 
   // Particle animation
   useEffect(() => {
@@ -200,10 +326,50 @@ const Portfolio = () => {
     };
     
     animate();
+    
+    const handleResize = () => {
+      canvas.width = window.innerWidth;
+      canvas.height = window.innerHeight;
+    };
+    
+    window.addEventListener('resize', handleResize);
+    return () => window.removeEventListener('resize', handleResize);
   }, [particlesEnabled, darkMode]);
 
   const scrollToSection = (sectionId) => {
     document.getElementById(sectionId)?.scrollIntoView({ behavior: 'smooth' });
+  };
+
+  const formatDate = (dateString) => {
+    const date = new Date(dateString);
+    return date.toLocaleDateString('en-US', { 
+      year: 'numeric', 
+      month: 'short' 
+    });
+  };
+
+  const getLanguageColor = (language) => {
+    const colors = {
+      'JavaScript': '#f1e05a',
+      'TypeScript': '#2b7489',
+      'Python': '#3572A5',
+      'Java': '#b07219',
+      'C++': '#f34b7d',
+      'C': '#555555',
+      'HTML': '#e34c26',
+      'CSS': '#1563e0',
+      'React': '#61dafb',
+      'Vue': '#4FC08D',
+      'PHP': '#4F5D95',
+      'Ruby': '#cc342d',
+      'Go': '#00ADD8',
+      'Rust': '#dea584',
+      'Swift': '#ffac45',
+      'Kotlin': '#A97BFF',
+      'Dart': '#00B4AB',
+      'Jupyter Notebook': '#DA5B0B'
+    };
+    return colors[language] || '#8b949e';
   };
 
   const SkillCard = ({ category, data, index }) => {
@@ -240,11 +406,15 @@ const Portfolio = () => {
   };
 
   const ExperienceCard = ({ exp, index }) => (
-    <div className={`relative p-6 bg-white dark:bg-gray-800 rounded-2xl shadow-xl hover:shadow-2xl transition-all duration-500 transform hover:scale-105 border-l-4 border-gradient-to-b from-blue-500 to-purple-600`}>
+    <div className="relative p-6 bg-white dark:bg-gray-800 rounded-2xl shadow-xl hover:shadow-2xl transition-all duration-500 transform hover:scale-105 border-l-4 border-blue-500">
       <div className="flex justify-between items-start mb-4">
         <div>
-          <h3 className="text-xl font-bold text-gray-900 dark:text-white">{exp.title}</h3>
-          <p className="text-lg font-semibold text-blue-600 dark:text-blue-400">{exp.company}</p>
+          <h3 className="text-xl font-bold text-gray-900 dark:text-white mb-2">
+            {exp.title}
+          </h3>
+          <p className="text-lg font-semibold text-blue-600 dark:text-blue-400">
+            {exp.company}
+          </p>
           <p className="text-gray-600 dark:text-gray-300 flex items-center">
             <MapPin className="h-4 w-4 mr-1" />
             {exp.location}
@@ -271,7 +441,7 @@ const Portfolio = () => {
     </div>
   );
 
-  const ProjectCard = ({ project, index }) => (
+  const GitHubProjectCard = ({ project, index }) => (
     <div className="group relative bg-white dark:bg-gray-800 rounded-2xl overflow-hidden shadow-xl hover:shadow-2xl transition-all duration-500 transform hover:scale-105">
       <div className="absolute top-0 left-0 w-full h-1 bg-gradient-to-r from-blue-500 to-purple-600"></div>
       <div className="p-6">
@@ -279,37 +449,88 @@ const Portfolio = () => {
           <h3 className="text-xl font-bold text-gray-900 dark:text-white group-hover:text-blue-600 transition-colors">
             {project.title}
           </h3>
-          <ExternalLink className="h-5 w-5 text-gray-400 group-hover:text-blue-500 transition-colors cursor-pointer" />
+          <div className="flex space-x-2">
+            {project.homepage && (
+              <a href={project.homepage} target="_blank" rel="noopener noreferrer">
+                <ExternalLink className="h-5 w-5 text-gray-400 hover:text-blue-500 transition-colors cursor-pointer" />
+              </a>
+            )}
+            <a href={project.html_url} target="_blank" rel="noopener noreferrer">
+              <Github className="h-5 w-5 text-gray-400 hover:text-blue-500 transition-colors cursor-pointer" />
+            </a>
+          </div>
         </div>
         
-        <p className="text-gray-600 dark:text-gray-300 mb-4">{project.description}</p>
+        <p className="text-gray-600 dark:text-gray-300 mb-4 text-sm leading-relaxed">
+          {project.description}
+        </p>
         
         <div className="flex flex-wrap gap-2 mb-4">
-          {project.tech.map((tech, idx) => (
+          {project.language && (
+            <span 
+              className="px-2 py-1 rounded text-xs font-medium flex items-center"
+              style={{ 
+                backgroundColor: darkMode ? 'rgba(255, 255, 255, 0.1)' : 'rgba(0, 0, 0, 0.1)',
+                color: getLanguageColor(project.language)
+              }}
+            >
+              <span 
+                className="w-2 h-2 rounded-full mr-1"
+                style={{ backgroundColor: getLanguageColor(project.language) }}
+              ></span>
+              {project.language}
+            </span>
+          )}
+          {project.topics.slice(0, 3).map((topic, idx) => (
             <span key={idx} className="px-2 py-1 bg-blue-100 dark:bg-blue-900 text-blue-800 dark:text-blue-200 rounded text-xs font-medium">
-              {tech}
+              {topic}
             </span>
           ))}
         </div>
         
-        <div className="grid grid-cols-3 gap-2 text-center">
-          {project.metrics.map((metric, idx) => (
-            <div key={idx} className="p-2 bg-gray-50 dark:bg-gray-700 rounded-lg">
-              <p className="text-xs font-medium text-gray-900 dark:text-white">{metric}</p>
+        <div className="flex justify-between items-center text-sm">
+          <div className="flex space-x-4">
+            <div className="flex items-center text-gray-500 dark:text-gray-400">
+              <Star className="h-4 w-4 mr-1" />
+              {project.stars}
             </div>
-          ))}
+            <div className="flex items-center text-gray-500 dark:text-gray-400">
+              <GitFork className="h-4 w-4 mr-1" />
+              {project.forks}
+            </div>
+          </div>
+          <div className="text-xs text-gray-400 dark:text-gray-500">
+            Updated {formatDate(project.updated_at)}
+          </div>
         </div>
+      </div>
+    </div>
+  );
+
+  const LoadingCard = () => (
+    <div className="p-6 bg-gray-200 dark:bg-gray-800 rounded-2xl animate-pulse">
+      <div className="h-6 bg-gray-300 dark:bg-gray-700 rounded mb-4"></div>
+      <div className="h-4 bg-gray-300 dark:bg-gray-700 rounded mb-2"></div>
+      <div className="h-4 bg-gray-300 dark:bg-gray-700 rounded mb-4 w-3/4"></div>
+      <div className="flex space-x-2">
+        <div className="h-6 w-16 bg-gray-300 dark:bg-gray-700 rounded"></div>
+        <div className="h-6 w-16 bg-gray-300 dark:bg-gray-700 rounded"></div>
       </div>
     </div>
   );
 
   return (
     <div className={`min-h-screen transition-colors duration-300 ${darkMode ? 'dark bg-gray-900' : 'bg-gray-50'}`}>
+      
       {/* Navigation */}
-      <nav className={`fixed top-0 w-full z-50 transition-all duration-300 ${isScrolled ? 'bg-white/90 dark:bg-gray-900/90 backdrop-blur-md shadow-lg' : 'bg-transparent'}`}>
+      <nav className={`fixed top-0 w-full z-50 transition-all duration-300 ${
+        isScrolled 
+          ? 'bg-white/90 dark:bg-gray-900/90 backdrop-blur-md shadow-lg' 
+          : 'bg-transparent'
+      }`}>
         <div className="container mx-auto px-6 py-4">
           <div className="flex justify-between items-center">
-            <div className="text-2xl font-bold bg-gradient-to-r from-blue-600 to-purple-600 bg-clip-text text-transparent">
+            <div className="text-2xl font-bold text-gradient">
               Taha Shah
             </div>
             
@@ -318,7 +539,11 @@ const Portfolio = () => {
                 <button
                   key={item}
                   onClick={() => scrollToSection(item)}
-                  className={`capitalize font-medium transition-all duration-300 hover:text-blue-600 ${activeSection === item ? 'text-blue-600 border-b-2 border-blue-600' : 'text-gray-700 dark:text-gray-300'}`}
+                  className={`capitalize font-medium transition-all duration-300 hover:text-blue-600 ${
+                    activeSection === item 
+                      ? 'text-blue-600 border-b-2 border-blue-600' 
+                      : 'text-gray-700 dark:text-gray-300'
+                  }`}
                 >
                   {item}
                 </button>
@@ -343,6 +568,13 @@ const Portfolio = () => {
         </div>
       </nav>
 
+      {/* API Status (Development only) */}
+      {process.env.NODE_ENV === 'development' && apiStats.remaining && (
+        <div className="fixed top-20 right-4 z-40 bg-black text-white p-2 rounded text-xs">
+          API: {apiStats.remaining}/{apiStats.limit}
+        </div>
+      )}
+
       {/* Particle Background */}
       <canvas
         id="particles"
@@ -357,7 +589,7 @@ const Portfolio = () => {
         <div className="relative z-10 text-center px-6 max-w-4xl mx-auto">
           <div className="mb-8">
             <h1 className="text-5xl md:text-7xl font-bold text-gray-900 dark:text-white mb-6 animate-fade-in">
-              Hi, I'm <span className="bg-gradient-to-r from-blue-600 to-purple-600 bg-clip-text text-transparent">Taha Shah</span>
+              Hi, I'm <span className="text-gradient">Taha Shah</span>
             </h1>
             
             <div className="text-2xl md:text-3xl font-semibold text-gray-700 dark:text-gray-300 mb-6 h-12 flex items-center justify-center">
@@ -374,32 +606,31 @@ const Portfolio = () => {
           </div>
           
           <div className="flex flex-col sm:flex-row gap-4 justify-center items-center mb-12">
-  <button
-    onClick={() => scrollToSection('projects')}
-    className="px-8 py-4 bg-gradient-to-r from-blue-600 to-purple-600 text-white font-semibold rounded-full hover:scale-105 transform transition-all duration-300 shadow-lg hover:shadow-xl"
-  >
-    View My Work
-  </button>
+            <button
+              onClick={() => scrollToSection('projects')}
+              className="px-8 py-4 bg-gradient-to-r from-blue-600 to-purple-600 text-white font-semibold rounded-full hover:scale-105 transform transition-all duration-300 shadow-lg hover:shadow-xl"
+            >
+              View My Work
+            </button>
 
-  <button
-    onClick={() => scrollToSection('contact')}
-    className="px-8 py-4 border-2 border-blue-600 text-blue-600 dark:text-blue-400 font-semibold rounded-full hover:bg-blue-600 hover:text-white transition-all duration-300"
-  >
-    Get In Touch
-  </button>
+            <button
+              onClick={() => scrollToSection('contact')}
+              className="px-8 py-4 border-2 border-blue-600 text-blue-600 dark:text-blue-400 font-semibold rounded-full hover:bg-blue-600 hover:text-white transition-all duration-300"
+            >
+              Get In Touch
+            </button>
 
-  <a
-    href="https://drive.google.com/file/d/1eQ_uho2TXx3YY9FO_citMuuCTXQJtYsO/view?usp=sharing"
-    target="_blank"
-    rel="noopener noreferrer"
-  >
-    <button className="px-8 py-4 bg-gray-200 dark:bg-gray-700 text-gray-700 dark:text-gray-300 font-semibold rounded-full hover:bg-gray-300 dark:hover:bg-gray-600 transition-all duration-300 flex items-center">
-      <Download className="h-5 w-5 mr-2" />
-      Download CV
-    </button>
-  </a>
-</div>
-
+            <a
+              href="https://drive.google.com/file/d/1eQ_uho2TXx3YY9FO_citMuuCTXQJtYsO/view?usp=sharing"
+              target="_blank"
+              rel="noopener noreferrer"
+            >
+              <button className="px-8 py-4 bg-gray-200 dark:bg-gray-700 text-gray-700 dark:text-gray-300 font-semibold rounded-full hover:bg-gray-300 dark:hover:bg-gray-600 transition-all duration-300 flex items-center">
+                <Download className="h-5 w-5 mr-2" />
+                Download CV
+              </button>
+            </a>
+          </div>
           
           <div className="flex justify-center space-x-6">
             <a href="mailto:tahashah366@gmail.com" className="p-3 bg-white/10 backdrop-blur-sm rounded-full hover:bg-white/20 transition-all duration-300 hover:scale-110">
@@ -422,7 +653,7 @@ const Portfolio = () => {
       {/* About Section */}
       <section id="about" className="py-20 px-6">
         <div className="container mx-auto max-w-6xl">
-          <h2 className="text-4xl font-bold text-center mb-16 bg-gradient-to-r from-blue-600 to-purple-600 bg-clip-text text-transparent">
+          <h2 className="text-4xl font-bold text-center mb-16 text-gradient">
             About Me
           </h2>
           
@@ -442,12 +673,14 @@ const Portfolio = () => {
               
               <div className="grid grid-cols-2 gap-4 mt-8">
                 <div className="text-center p-4 bg-white dark:bg-gray-800 rounded-xl shadow-lg">
-                  <div className="text-3xl font-bold text-blue-600 mb-2">35+</div>
-                  <div className="text-sm text-gray-600 dark:text-gray-400">ML Models Built</div>
+                  <div className="text-3xl font-bold text-blue-600 mb-2">{githubProjects.length}+</div>
+                  <div className="text-sm text-gray-600 dark:text-gray-400">GitHub Projects</div>
                 </div>
                 <div className="text-center p-4 bg-white dark:bg-gray-800 rounded-xl shadow-lg">
-                  <div className="text-3xl font-bold text-purple-600 mb-2">95%</div>
-                  <div className="text-sm text-gray-600 dark:text-gray-400">Model Accuracy</div>
+                  <div className="text-3xl font-bold text-purple-600 mb-2">
+                    {githubProjects.reduce((acc, project) => acc + project.stars, 0)}
+                  </div>
+                  <div className="text-sm text-gray-600 dark:text-gray-400">GitHub Stars</div>
                 </div>
                 <div className="text-center p-4 bg-white dark:bg-gray-800 rounded-xl shadow-lg">
                   <div className="text-3xl font-bold text-green-600 mb-2">10M+</div>
@@ -479,7 +712,7 @@ const Portfolio = () => {
       {/* Experience Section */}
       <section id="experience" className="py-20 px-6 bg-white dark:bg-gray-800">
         <div className="container mx-auto max-w-6xl">
-          <h2 className="text-4xl font-bold text-center mb-16 bg-gradient-to-r from-blue-600 to-purple-600 bg-clip-text text-transparent">
+          <h2 className="text-4xl font-bold text-center mb-16 text-gradient">
             Professional Experience
           </h2>
           
@@ -494,7 +727,7 @@ const Portfolio = () => {
       {/* Skills Section */}
       <section id="skills" className="py-20 px-6">
         <div className="container mx-auto max-w-6xl">
-          <h2 className="text-4xl font-bold text-center mb-16 bg-gradient-to-r from-blue-600 to-purple-600 bg-clip-text text-transparent">
+          <h2 className="text-4xl font-bold text-center mb-16 text-gradient">
             Technical Expertise
           </h2>
           
@@ -509,35 +742,94 @@ const Portfolio = () => {
       {/* Projects Section */}
       <section id="projects" className="py-20 px-6 bg-white dark:bg-gray-800">
         <div className="container mx-auto max-w-6xl">
-          <h2 className="text-4xl font-bold text-center mb-8 bg-gradient-to-r from-blue-600 to-purple-600 bg-clip-text text-transparent">
-            Featured Projects
+          <h2 className="text-4xl font-bold text-center mb-8 text-gradient">
+            Featured Projects from GitHub
           </h2>
           
+          {error && (
+            <div className="text-center mb-8">
+              <p className="text-lg text-red-600 dark:text-red-400">
+                {error}
+              </p>
+              <p className="text-sm mt-2 text-gray-600 dark:text-gray-400">
+                {apiStats.remaining !== null && `API Rate Limit: ${apiStats.remaining}/${apiStats.limit}`}
+              </p>
+            </div>
+          )}
+          
+          {/* Fixed Button Container */}
           <div className="flex justify-center mb-12">
-            <div className="flex space-x-4 bg-gray-100 dark:bg-gray-700 rounded-full p-1">
-              {['all', 'ml', 'data-science'].map((filter) => (
-                <button
-                  key={filter}
-                  onClick={() => setProjectFilter(filter)}
-                  className={`px-6 py-2 rounded-full capitalize font-medium transition-all duration-300 ${
-                    projectFilter === filter 
-                      ? 'bg-blue-600 text-white shadow-lg' 
-                      : 'text-gray-600 dark:text-gray-300 hover:text-blue-600'
-                  }`}
-                >
-                  {filter === 'all' ? 'All Projects' : filter.replace('-', ' ')}
-                </button>
-              ))}
+            <div className="w-full max-w-4xl">
+              {/* Desktop Layout */}
+              <div className="hidden md:flex flex-wrap justify-center items-center gap-3 bg-gray-100 dark:bg-gray-700 rounded-full p-3">
+                {getProjectCategories().map((filter) => (
+                  <button
+                    key={filter}
+                    onClick={() => setProjectFilter(filter)}
+                    className={`px-4 py-2 rounded-full capitalize font-medium transition-all duration-300 text-sm whitespace-nowrap ${
+                      projectFilter === filter 
+                        ? 'bg-blue-600 text-white shadow-lg transform scale-105' 
+                        : 'text-gray-600 dark:text-gray-300 hover:text-blue-600 hover:bg-gray-200 dark:hover:bg-gray-600'
+                    }`}
+                  >
+                    {filter === 'all' ? 'All Projects' : filter.replace('-', ' ')}
+                  </button>
+                ))}
+              </div>
+              
+              {/* Mobile Layout */}
+              <div className="md:hidden">
+                <div className="flex gap-3 p-4 overflow-x-auto scrollbar-hide bg-gray-100 dark:bg-gray-700 rounded-2xl">
+                  {getProjectCategories().map((filter) => (
+                    <button
+                      key={filter}
+                      onClick={() => setProjectFilter(filter)}
+                      className={`px-4 py-2 rounded-full capitalize font-medium transition-all duration-300 text-sm whitespace-nowrap flex-shrink-0 ${
+                        projectFilter === filter 
+                          ? 'bg-blue-600 text-white shadow-lg' 
+                          : 'text-gray-600 dark:text-gray-300 hover:text-blue-600 hover:bg-gray-200 dark:hover:bg-gray-600'
+                      }`}
+                    >
+                      {filter === 'all' ? 'All Projects' : filter.replace('-', ' ')}
+                    </button>
+                  ))}
+                </div>
+              </div>
             </div>
           </div>
           
           <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-8">
-            {projects
-              .filter(project => projectFilter === 'all' || project.category === projectFilter)
-              .map((project, index) => (
-                <ProjectCard key={index} project={project} index={index} />
-              ))}
+            {loading ? (
+              Array.from({ length: 6 }).map((_, index) => (
+                <LoadingCard key={index} />
+              ))
+            ) : filteredProjects.length > 0 ? (
+              filteredProjects.map((project, index) => (
+                <GitHubProjectCard key={project.id} project={project} index={index} />
+              ))
+            ) : (
+              <div className="col-span-full text-center py-12">
+                <Github className="h-16 w-16 mx-auto mb-4 text-gray-400 dark:text-gray-600" />
+                <p className="text-lg text-gray-600 dark:text-gray-400">
+                  No projects found for the selected category.
+                </p>
+              </div>
+            )}
           </div>
+          
+          {!loading && githubProjects.length > 0 && (
+            <div className="text-center mt-12">
+              <a
+                href={`https://github.com/${GITHUB_USERNAME}`}
+                target="_blank"
+                rel="noopener noreferrer"
+                className="inline-flex items-center px-8 py-4 bg-gray-900 text-white font-semibold rounded-full hover:bg-gray-800 transition-all duration-300 shadow-lg hover:shadow-xl"
+              >
+                <Github className="h-5 w-5 mr-2" />
+                View All Projects on GitHub
+              </a>
+            </div>
+          )}
         </div>
       </section>
 
