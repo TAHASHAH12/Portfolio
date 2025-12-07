@@ -690,9 +690,10 @@ const Portfolio = () => {
               </p>
 
               <p className="text-lg text-gray-700 dark:text-gray-300 leading-relaxed">
-                Currently pursuing my Bachelor's in Computer Science at NUCES, I've worked with leading
-                organizations like IAL Saatchi & Saatchi, where I've consistently delivered
-                measurable improvements through innovative data science approaches.
+            Proven expertise in developing data-driven
+solutions, creating interactive dashboards, and implementing ML models that drive business impact. Profi
+cient in Python, TensorFlow, SQL, and advanced analytics with demonstrated success in feature engineering,
+model optimization, and computer vision applications
               </p>
 
               <div className="grid grid-cols-2 gap-4 mt-8">
