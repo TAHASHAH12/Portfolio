@@ -175,123 +175,6 @@ const Portfolio = () => {
   const GITHUB_USERNAME = process.env.REACT_APP_GITHUB_USERNAME || 'TAHASHAH12';
   const GITHUB_TOKEN = process.env.REACT_APP_GITHUB_TOKEN;
 
-  // Enhanced GitHub fetch with proper error handling
-  const fetchGithubProjects = async () => {
-    try {
-      setLoading(true);
-      setError(null);
-
-      // Check if token exists
-      if (!GITHUB_TOKEN) {
-        console.warn('No GitHub token found, using fallback projects');
-        setGithubProjects(fallbackProjects);
-        setError('GitHub token not configured - showing sample projects');
-        setLoading(false);
-        return;
-      }
-
-      // Validate token format
-      if (!GITHUB_TOKEN.startsWith('ghp_') && !GITHUB_TOKEN.startsWith('github_pat_')) {
-        console.error('Invalid GitHub token format');
-        setGithubProjects(fallbackProjects);
-        setError('Invalid GitHub token format - using sample projects');
-        setLoading(false);
-        return;
-      }
-
-      console.log('Fetching GitHub projects...');
-
-      const response = await fetch(
-        `https://api.github.com/users/${GITHUB_USERNAME}/repos?sort=updated&per_page=20&type=owner`,
-        {
-          headers: {
-            'Accept': 'application/vnd.github.v3+json',
-            'Authorization': `Bearer ${GITHUB_TOKEN}`,
-            'User-Agent': 'Portfolio-App'
-          }
-        }
-      );
-
-      // Log rate limit info
-      const rateLimitRemaining = response.headers.get('X-RateLimit-Remaining');
-      const rateLimitLimit = response.headers.get('X-RateLimit-Limit');
-
-      setApiStats({
-        remaining: rateLimitRemaining,
-        limit: rateLimitLimit
-      });
-
-      console.log(`GitHub API Rate Limit: ${rateLimitRemaining}/${rateLimitLimit}`);
-
-      if (!response.ok) {
-        let errorMessage = `GitHub API error: ${response.status} ${response.statusText}`;
-
-        if (response.status === 401) {
-          errorMessage = 'GitHub API authentication failed. Please check your token.';
-        } else if (response.status === 403) {
-          errorMessage = response.headers.get('X-RateLimit-Remaining') === '0'
-            ? 'GitHub API rate limit exceeded. Please try again later.'
-            : 'GitHub API access forbidden. Please check your token permissions.';
-        } else if (response.status === 404) {
-          errorMessage = `GitHub user '${GITHUB_USERNAME}' not found.`;
-        }
-
-        throw new Error(errorMessage);
-      }
-
-      const repos = await response.json();
-
-      if (!Array.isArray(repos)) {
-        throw new Error('Invalid response format from GitHub API');
-      }
-
-      // Process repositories
-      const processedProjects = repos
-        .filter(repo => {
-          return !repo.fork &&
-            !repo.archived &&
-            repo.description &&
-            repo.description.trim() !== '' &&
-            !repo.name.includes('.github.io');
-        })
-        .slice(0, 12)
-        .map(repo => ({
-          id: repo.id,
-          title: repo.name
-            .replace(/-/g, ' ')
-            .replace(/_/g, ' ')
-            .replace(/\b\w/g, l => l.toUpperCase()),
-          name: repo.name,
-          description: repo.description,
-          html_url: repo.html_url,
-          homepage: repo.homepage,
-          language: repo.language,
-          stars: repo.stargazers_count,
-          forks: repo.forks_count,
-          topics: repo.topics || [],
-          updated_at: repo.updated_at,
-          category: categorizeProject(repo.name, repo.description, repo.topics, repo.language)
-        }))
-        .sort((a, b) => new Date(b.updated_at) - new Date(a.updated_at));
-
-      if (processedProjects.length === 0) {
-        console.warn('No projects found, using fallback projects');
-        setGithubProjects(fallbackProjects);
-        setError('No suitable repositories found - showing sample projects');
-      } else {
-        setGithubProjects(processedProjects);
-        console.log(`Successfully fetched ${processedProjects.length} repositories`);
-      }
-
-    } catch (err) {
-      console.error('Error fetching GitHub projects:', err);
-      setGithubProjects(fallbackProjects);
-      setError(err.message || 'Failed to load projects from GitHub - showing sample projects');
-    } finally {
-      setLoading(false);
-    }
-  };
-
   // Categorize projects
   const categorizeProject = (name, description, topics, language) => {
     const nameAndDesc = `${name} ${description}`.toLowerCase();
@@ -316,6 +199,134 @@ const Portfolio = () => {
     }
 
     return 'other';
+  };
+
+  // Enhanced GitHub fetch with GraphQL for pinned repos
+  const fetchGithubProjects = async () => {
+    try {
+      setLoading(true);
+      setError(null);
+
+      // GraphQL does not expose REST rate-limit headers; keep nulls
+      setApiStats({ remaining: null, limit: null });
+
+      // Check if token exists
+      if (!GITHUB_TOKEN) {
+        console.warn('No GitHub token found, using fallback projects');
+        setGithubProjects(fallbackProjects);
+        setError('GitHub token not configured - showing sample projects');
+        setLoading(false);
+        return;
+      }
+
+      console.log('Fetching GitHub pinned repositories...');
+
+      const query = `
+        query {
+          user(login: "${GITHUB_USERNAME}") {
+            pinnedItems(first: 6, types: REPOSITORY) {
+              nodes {
+                ... on Repository {
+                  id
+                  name
+                  description
+                  url
+                  homepageUrl
+                  stargazerCount
+                  forkCount
+                  primaryLanguage {
+                    name
+                    color
+                  }
+                  repositoryTopics(first: 10) {
+                    nodes {
+                      topic {
+                        name
+                      }
+                    }
+                  }
+                  updatedAt
+                  createdAt
+                }
+              }
+            }
+          }
+        }
+      `;
+
+      const response = await fetch('https://api.github.com/graphql', {
+        method: 'POST',
+        headers: {
+          'Authorization': `Bearer ${GITHUB_TOKEN}`,
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({ query })
+      });
+
+      if (!response.ok) {
+        let errorMessage = `GitHub API error: ${response.status} ${response.statusText}`;
+
+        if (response.status === 401) {
+          errorMessage = 'GitHub API authentication failed. Please check your token.';
+        } else if (response.status === 403) {
+          errorMessage = 'GitHub API access forbidden. Please check your token permissions.';
+        } else if (response.status === 404) {
+          errorMessage = `GitHub user '${GITHUB_USERNAME}' not found.`;
+        }
+
+        throw new Error(errorMessage);
+      }
+
+      const result = await response.json();
+
+      if (result.errors && result.errors.length > 0) {
+        throw new Error(result.errors[0].message || 'GraphQL error while fetching pinned repositories');
+      }
+
+      const pinnedRepos = result.data?.user?.pinnedItems?.nodes || [];
+
+      if (!Array.isArray(pinnedRepos) || pinnedRepos.length === 0) {
+        console.warn('No pinned repositories found, using fallback projects');
+        setGithubProjects(fallbackProjects);
+        setError('No pinned repositories found - showing sample projects');
+        setLoading(false);
+        return;
+      }
+
+      const processedProjects = pinnedRepos
+        .map(repo => {
+          const topics = (repo.repositoryTopics?.nodes || []).map(n => n.topic?.name || '').filter(Boolean);
+
+          return {
+            id: repo.id,
+            title: repo.name
+              .replace(/-/g, ' ')
+              .replace(/_/g, ' ')
+              .replace(/\b\w/g, l => l.toUpperCase()),
+            name: repo.name,
+            description: repo.description,
+            html_url: repo.url,
+            homepage: repo.homepageUrl,
+            language: repo.primaryLanguage?.name || null,
+            languageColor: repo.primaryLanguage?.color || null,
+            stars: repo.stargazerCount,
+            forks: repo.forkCount,
+            topics,
+            updated_at: repo.updatedAt,
+            category: categorizeProject(repo.name, repo.description || '', topics, repo.primaryLanguage?.name || '')
+          };
+        })
+        .sort((a, b) => new Date(b.updated_at) - new Date(a.updated_at));
+
+      setGithubProjects(processedProjects);
+      console.log(`Successfully fetched ${processedProjects.length} pinned repositories`);
+    } catch (err) {
+      console.error('Error fetching GitHub pinned repositories:', err);
+      setGithubProjects(fallbackProjects);
+      setError(err.message || 'Failed to load pinned repositories - showing sample projects');
+    } finally {
+      setLoading(false);
+    }
   };
 
   // Get unique categories
@@ -393,7 +404,8 @@ const Portfolio = () => {
     });
   };
 
-  const getLanguageColor = (language) => {
+  const getLanguageColor = (language, languageColor) => {
+    if (languageColor) return languageColor;
     const colors = {
       'JavaScript': '#f1e05a',
       'TypeScript': '#2b7489',
@@ -500,12 +512,12 @@ const Portfolio = () => {
               className="px-2 py-1 rounded text-xs font-medium flex items-center"
               style={{
                 backgroundColor: darkMode ? 'rgba(255, 255, 255, 0.1)' : 'rgba(0, 0, 0, 0.1)',
-                color: getLanguageColor(project.language)
+                color: getLanguageColor(project.language, project.languageColor)
               }}
             >
               <span
                 className="w-2 h-2 rounded-full mr-1"
-                style={{ backgroundColor: getLanguageColor(project.language) }}
+                style={{ backgroundColor: getLanguageColor(project.language, project.languageColor) }}
               ></span>
               {project.language}
             </span>
