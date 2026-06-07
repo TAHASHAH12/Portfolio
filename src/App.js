@@ -1,8 +1,8 @@
 import React, { useState, useEffect } from 'react';
 import {
   ChevronDown, Mail, Phone, MapPin, Github, Linkedin, Code, Database,
-  Brain, TrendingUp, Calendar, ArrowRight, ExternalLink, Download,
-  Play, Pause, Star, GitFork, AlertCircle, RefreshCw
+  Brain, TrendingUp, Calendar, ExternalLink, Download,
+  Star, GitFork, AlertCircle, RefreshCw, Award, Cpu
 } from 'lucide-react';
 
 const Portfolio = () => {
@@ -10,216 +10,164 @@ const Portfolio = () => {
   const [isScrolled, setIsScrolled] = useState(false);
   const [currentRole, setCurrentRole] = useState(0);
   const [isTyping, setIsTyping] = useState(true);
-  const [particlesEnabled, setParticlesEnabled] = useState(true);
   const [projectFilter, setProjectFilter] = useState('all');
-  const [darkMode, setDarkMode] = useState(false);
+  const [darkMode, setDarkMode] = useState(true);
   const [githubProjects, setGithubProjects] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
+  // eslint-disable-next-line no-unused-vars
   const [apiStats, setApiStats] = useState({ remaining: null, limit: null });
+  const [cursorVisible, setCursorVisible] = useState(true);
 
   const roles = [
+    'AI Solutions Engineer',
     'Data Scientist',
     'Machine Learning Engineer',
-    'AI/ML Specialist',
-    'Data Analytics Expert',
-    'Business Intelligence Developer'
+    'AI / ML Consultant',
+    'Business Intelligence Developer',
   ];
 
   const skills = {
-    'Machine Learning': {
-      items: ['TensorFlow', 'PyTorch', 'Scikit-learn', 'Deep Learning', 'Neural Networks', 'Computer Vision'],
-      color: 'from-blue-500 to-purple-600',
-      icon: Brain
+    'AI & Machine Learning': {
+      items: ['TensorFlow', 'PyTorch', 'Keras', 'Scikit-learn', 'XGBoost', 'NLP', 'Computer Vision'],
+      icon: Brain,
+      accent: '#00d4ff',
     },
-    'Data Science': {
-      items: ['Python', 'R', 'Statistics', 'Predictive Modeling', 'Feature Engineering', 'Data Mining'],
-      color: 'from-green-500 to-teal-600',
-      icon: TrendingUp
+    'Languages & APIs': {
+      items: ['Python', 'JavaScript', 'TypeScript', 'React', 'REST APIs', 'SQL', 'R', 'C++'],
+      icon: Code,
+      accent: '#00ff88',
     },
-    'Data Engineering': {
-      items: ['SQL', 'NoSQL', 'Apache Spark', 'Hadoop', 'ETL', 'Data Pipelines'],
-      color: 'from-orange-500 to-red-600',
-      icon: Database
+    'Data & Databases': {
+      items: ['PostgreSQL', 'MySQL', 'MongoDB', 'Snowflake', 'ETL Pipelines', 'Feature Engineering'],
+      icon: Database,
+      accent: '#a855f7',
+    },
+    'Cloud & DevOps': {
+      items: ['AWS', 'Google Cloud Platform', 'Docker', 'Git', 'Data Pipelines', 'Automation'],
+      icon: Cpu,
+      accent: '#f59e0b',
     },
     'Visualization & BI': {
-      items: ['Power BI', 'Tableau', 'D3.js', 'Plotly', 'Matplotlib', 'Seaborn'],
-      color: 'from-pink-500 to-rose-600',
-      icon: Code
-    }
+      items: ['Power BI', 'Tableau', 'Plotly', 'Matplotlib', 'Seaborn'],
+      icon: TrendingUp,
+      accent: '#ec4899',
+    },
   };
 
   const experiences = [
     {
-      title: 'Data Annotator',
-      company: 'Motive Formerly (KeepTruckin)',
-      location: 'California, USA',
-      period: 'Present',
-      type: 'Data Analyst',
+      title: 'Data Analyst',
+      company: 'Motive (GoMotive.com)',
+      location: 'Karachi, Pakistan',
+      period: 'March 2025 – Present',
+      type: 'ML & Analytics',
       achievements: [
-        'Annotate images, videos, text, or audio with relevant tags and labels as per the project requirements.',
-        'Adhere strictly to detailed guidelines to ensure consistency and quality across all data.',
-        'Review and correct annotations to maintain high accuracy and reliability in labeled datasets.'
-      ]
+        'Validated and tested ML models for fleet management using Python and TensorFlow, improving AI violation-detection accuracy by 25% through curated high-quality labeled datasets.',
+        'Built automated annotation pipelines for large-scale video data processing, cutting manual labeling time by 30% while sustaining 95%+ accuracy.',
+        'Analyzed fleet telematics data using SQL and statistical analysis to surface actionable insights on driver behavior and vehicle tracking.',
+        'Designed A/B testing frameworks and performance dashboards to measure iterative AI model improvements.',
+      ],
     },
     {
       title: 'Data Analyst',
       company: 'IAL Saatchi & Saatchi',
-      location: 'Karachi',
-      period: 'Oct 2024 - Mar 2025',
+      location: 'Karachi, Pakistan',
+      period: 'October 2024 – March 2025',
       type: 'Analytics',
       achievements: [
-        'Developed ML models for campaign performance optimization',
-        'Created real-time dashboards processing 10M+ data points daily',
-        'Implemented A/B testing frameworks improving conversion by 25%',
-        'Built predictive models for customer lifetime value estimation'
-      ]
+        'Analyzed advertising campaign performance using statistical analysis and data mining, contributing to a 15% improvement in campaign efficiency.',
+        'Created real-time dashboards and automated reports in Power BI and Tableau, reducing manual reporting overhead for stakeholders.',
+        'Applied customer segmentation and predictive analytics using SQL queries and feature engineering to support strategic business decisions.',
+      ],
     },
     {
-      title: 'Data Scientist',
-      company: 'White Light Digital Marketing',
-      location: 'California, USA',
-      period: 'Present',
+      title: 'Data Scientist Researcher (Contract)',
+      company: 'WLDM.IO',
+      location: 'Remote',
+      period: 'March 2024 – March 2025',
       type: 'Research',
       achievements: [
-        'Developed advanced ML algorithms improving accuracy by 15%',
-        'Optimized data preprocessing pipelines reducing processing time by 20%',
-        'Created interactive visualizations increasing stakeholder engagement by 25%',
-        'Published research on machine learning optimization techniques'
-      ]
+        'Developed predictive models with TensorFlow and statistical modeling for e-commerce workflow optimization, achieving 20% performance improvement.',
+        'Integrated NLP techniques into business intelligence workflows for automated SEO analysis, increasing organic traffic by 35%.',
+        'Built automated multi-channel reporting systems using Power BI and Tableau, replacing manual processes for campaign performance tracking.',
+        'Operated in a fully remote consulting environment, delivering solutions end-to-end across research, prototyping, and deployment phases.',
+      ],
     },
     {
-      title: 'Operations Intern',
-      company: 'PowerHouse.so',
-      location: 'California, USA',
-      period: 'Jun - Sep 2024',
-      type: 'Operations',
+      title: 'Data Analyst Intern',
+      company: 'ACM',
+      location: 'Seattle, USA (Remote)',
+      period: 'April 2024 – September 2024',
+      type: 'Internship',
       achievements: [
-        'Applied data analytics to optimize operational processes',
-        'Developed predictive maintenance models reducing costs by 10%',
-        'Created automated inventory management system using ML'
-      ]
-    }
+        'Applied supervised ML models (random forest, regression) to real-world datasets, achieving 15% accuracy improvement over baseline.',
+        'Built stakeholder-facing visualizations in Python and Tableau that increased insight comprehension by 25%.',
+        'Optimized ETL pipelines and data processing workflows, reducing processing time by 20%.',
+      ],
+    },
   ];
 
-  // Fallback projects in case GitHub API fails
-  const fallbackProjects = [
+  const certifications = [
+    { name: 'TensorFlow Developer Certificate', issuer: 'Google' },
+    { name: 'Supervised Machine Learning', issuer: 'Coursera / Stanford' },
+    { name: 'Certified Data Visualization Specialist', issuer: 'Professional Certification' },
+    { name: 'Python Programming (Intermediate)', issuer: 'HackerRank' },
+  ];
+
+  const keyProjects = [
     {
-      id: 'fallback-1',
-      title: 'Predictive Analytics Dashboard',
-      description: 'Real-time ML dashboard for business forecasting with advanced visualization capabilities',
-      html_url: 'https://github.com/TAHASHAH12',
+      id: 'proj-1',
+      title: 'AI Dashcam Analytics System',
+      description: 'Computer vision pipeline for real-time traffic violation detection achieving 90%+ accuracy. Built end-to-end from data ingestion and model training through deployment — directly applicable to AI-enabled business automation.',
+      html_url: 'https://github.com/taha-shah123',
       homepage: null,
       language: 'Python',
-      stars: 15,
-      forks: 3,
-      topics: ['machine-learning', 'python', 'dashboard'],
+      stars: 0,
+      forks: 0,
+      topics: ['computer-vision', 'tensorflow', 'opencv', 'deep-learning'],
+      updated_at: '2025-03-01T00:00:00Z',
+      category: 'ml',
+    },
+    {
+      id: 'proj-2',
+      title: 'SEO ML Analytics Dashboard',
+      description: 'ML-powered analytics dashboard integrating multiple data sources to track and optimize digital marketing performance across channels. Translates business KPIs into automated, actionable tooling.',
+      html_url: 'https://github.com/taha-shah123',
+      homepage: null,
+      language: 'Python',
+      stars: 0,
+      forks: 0,
+      topics: ['machine-learning', 'power-bi', 'nlp', 'seo'],
       updated_at: '2024-12-01T00:00:00Z',
-      category: 'ml'
+      category: 'data-science',
     },
-    {
-      id: 'fallback-2',
-      title: 'Customer Segmentation Engine',
-      description: 'ML-powered customer segmentation system using clustering algorithms',
-      html_url: 'https://github.com/TAHASHAH12',
-      homepage: null,
-      language: 'Python',
-      stars: 22,
-      forks: 7,
-      topics: ['data-science', 'clustering', 'marketing'],
-      updated_at: '2024-11-15T00:00:00Z',
-      category: 'data-science'
-    },
-    {
-      id: 'fallback-3',
-      title: 'Neural Network Optimizer',
-      description: 'Custom neural network architecture with performance optimizations',
-      html_url: 'https://github.com/TAHASHAH12',
-      homepage: null,
-      language: 'Python',
-      stars: 31,
-      forks: 12,
-      topics: ['neural-networks', 'optimization', 'deep-learning'],
-      updated_at: '2024-11-01T00:00:00Z',
-      category: 'ml'
-    },
-    {
-      id: 'fallback-4',
-      title: 'Data Pipeline Automation',
-      description: 'Automated ETL pipeline for processing large-scale datasets',
-      html_url: 'https://github.com/TAHASHAH12',
-      homepage: null,
-      language: 'Python',
-      stars: 18,
-      forks: 5,
-      topics: ['etl', 'data-engineering', 'spark'],
-      updated_at: '2024-10-20T00:00:00Z',
-      category: 'data-science'
-    },
-    {
-      id: 'fallback-5',
-      title: 'Portfolio Website',
-      description: 'Personal portfolio website built with React and Tailwind CSS',
-      html_url: 'https://github.com/TAHASHAH12/Portfolio',
-      homepage: 'https://tahashah-portfolio.vercel.app',
-      language: 'JavaScript',
-      stars: 8,
-      forks: 2,
-      topics: ['react', 'portfolio', 'tailwind'],
-      updated_at: '2024-12-15T00:00:00Z',
-      category: 'web-dev'
-    }
   ];
 
-  // GitHub API configuration
-  const GITHUB_USERNAME = process.env.REACT_APP_GITHUB_USERNAME || 'TAHASHAH12';
+  const GITHUB_USERNAME = process.env.REACT_APP_GITHUB_USERNAME || 'taha-shah123';
   const GITHUB_TOKEN = process.env.REACT_APP_GITHUB_TOKEN;
 
-  // Categorize projects
   const categorizeProject = (name, description, topics, language) => {
-    const nameAndDesc = `${name} ${description}`.toLowerCase();
-    const allTopics = topics.join(' ').toLowerCase();
-    const searchText = `${nameAndDesc} ${allTopics}`.toLowerCase();
-
-    if (searchText.match(/machine learning|ml|neural network|deep learning|tensorflow|pytorch|sklearn|ai|artificial intelligence|computer vision|nlp/)) {
-      return 'ml';
-    }
-
-    if (searchText.match(/data science|analytics|visualization|pandas|numpy|matplotlib|seaborn|jupyter|analysis|statistics|predictive/)) {
-      return 'data-science';
-    }
-
-    if (searchText.match(/web|react|javascript|html|css|frontend|backend|api|website|portfolio/) ||
-      language?.toLowerCase().match(/javascript|typescript|html|css/)) {
-      return 'web-dev';
-    }
-
-    if (language?.toLowerCase() === 'python') {
-      return 'python';
-    }
-
+    const searchText = `${name} ${description} ${topics.join(' ')}`.toLowerCase();
+    if (searchText.match(/machine.learning|ml|neural.network|deep.learning|tensorflow|pytorch|sklearn|ai|computer.vision|nlp/)) return 'ml';
+    if (searchText.match(/data.science|analytics|visualization|pandas|numpy|statistics|predictive/)) return 'data-science';
+    if (searchText.match(/web|react|javascript|html|css|frontend|backend|api|website/) || language?.toLowerCase().match(/javascript|typescript|html|css/)) return 'web-dev';
+    if (language?.toLowerCase() === 'python') return 'python';
     return 'other';
   };
 
-  // Enhanced GitHub fetch with GraphQL for pinned repos
   const fetchGithubProjects = async () => {
     try {
       setLoading(true);
       setError(null);
-
-      // GraphQL does not expose REST rate-limit headers; keep nulls
       setApiStats({ remaining: null, limit: null });
 
-      // Check if token exists
       if (!GITHUB_TOKEN) {
-        console.warn('No GitHub token found, using fallback projects');
-        setGithubProjects(fallbackProjects);
-        setError('GitHub token not configured - showing sample projects');
+        setGithubProjects(keyProjects);
+        setError('GitHub token not configured – showing key projects');
         setLoading(false);
         return;
       }
-
-      console.log('Fetching GitHub pinned repositories...');
 
       const query = `
         query {
@@ -227,26 +175,10 @@ const Portfolio = () => {
             pinnedItems(first: 6, types: REPOSITORY) {
               nodes {
                 ... on Repository {
-                  id
-                  name
-                  description
-                  url
-                  homepageUrl
-                  stargazerCount
-                  forkCount
-                  primaryLanguage {
-                    name
-                    color
-                  }
-                  repositoryTopics(first: 10) {
-                    nodes {
-                      topic {
-                        name
-                      }
-                    }
-                  }
+                  id name description url homepageUrl stargazerCount forkCount
+                  primaryLanguage { name color }
+                  repositoryTopics(first: 10) { nodes { topic { name } } }
                   updatedAt
-                  createdAt
                 }
               }
             }
@@ -256,39 +188,19 @@ const Portfolio = () => {
 
       const response = await fetch('https://api.github.com/graphql', {
         method: 'POST',
-        headers: {
-          'Authorization': `Bearer ${GITHUB_TOKEN}`,
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify({ query })
+        headers: { Authorization: `Bearer ${GITHUB_TOKEN}`, 'Content-Type': 'application/json' },
+        body: JSON.stringify({ query }),
       });
 
-      if (!response.ok) {
-        let errorMessage = `GitHub API error: ${response.status} ${response.statusText}`;
-
-        if (response.status === 401) {
-          errorMessage = 'GitHub API authentication failed. Please check your token.';
-        } else if (response.status === 403) {
-          errorMessage = 'GitHub API access forbidden. Please check your token permissions.';
-        } else if (response.status === 404) {
-          errorMessage = `GitHub user '${GITHUB_USERNAME}' not found.`;
-        }
-
-        throw new Error(errorMessage);
-      }
+      if (!response.ok) throw new Error(`GitHub API error: ${response.status} ${response.statusText}`);
 
       const result = await response.json();
-
-      if (result.errors && result.errors.length > 0) {
-        throw new Error(result.errors[0].message || 'GraphQL error while fetching pinned repositories');
-      }
+      if (result.errors?.length > 0) throw new Error(result.errors[0].message);
 
       const pinnedRepos = result.data?.user?.pinnedItems?.nodes || [];
-
-      if (!Array.isArray(pinnedRepos) || pinnedRepos.length === 0) {
-        console.warn('No pinned repositories found, using fallback projects');
-        setGithubProjects(fallbackProjects);
-        setError('No pinned repositories found - showing sample projects');
+      if (!pinnedRepos.length) {
+        setGithubProjects(keyProjects);
+        setError('No pinned repos found – showing key projects');
         setLoading(false);
         return;
       }
@@ -296,13 +208,9 @@ const Portfolio = () => {
       const processedProjects = pinnedRepos
         .map(repo => {
           const topics = (repo.repositoryTopics?.nodes || []).map(n => n.topic?.name || '').filter(Boolean);
-
           return {
             id: repo.id,
-            title: repo.name
-              .replace(/-/g, ' ')
-              .replace(/_/g, ' ')
-              .replace(/\b\w/g, l => l.toUpperCase()),
+            title: repo.name.replace(/-/g, ' ').replace(/_/g, ' ').replace(/\b\w/g, l => l.toUpperCase()),
             name: repo.name,
             description: repo.description,
             html_url: repo.url,
@@ -313,590 +221,603 @@ const Portfolio = () => {
             forks: repo.forkCount,
             topics,
             updated_at: repo.updatedAt,
-            category: categorizeProject(repo.name, repo.description || '', topics, repo.primaryLanguage?.name || '')
+            category: categorizeProject(repo.name, repo.description || '', topics, repo.primaryLanguage?.name || ''),
           };
         })
         .sort((a, b) => new Date(b.updated_at) - new Date(a.updated_at));
 
       setGithubProjects(processedProjects);
-      console.log(`Successfully fetched ${processedProjects.length} pinned repositories`);
     } catch (err) {
-      console.error('Error fetching GitHub pinned repositories:', err);
-      setGithubProjects(fallbackProjects);
-      setError(err.message || 'Failed to load pinned repositories - showing sample projects');
+      setGithubProjects(keyProjects);
+      setError(err.message || 'Failed to load repos – showing key projects');
     } finally {
       setLoading(false);
     }
   };
 
-  // Get unique categories
   const getProjectCategories = () => {
-    const categories = ['all'];
-    const uniqueCategories = [...new Set(githubProjects.map(project => project.category))];
-    return [...categories, ...uniqueCategories.sort()];
+    const unique = [...new Set(githubProjects.map(p => p.category))];
+    return ['all', ...unique.sort()];
   };
 
-  // Filter projects
-  const filteredProjects = githubProjects.filter(project =>
-    projectFilter === 'all' || project.category === projectFilter
-  );
+  const filteredProjects = githubProjects.filter(p => projectFilter === 'all' || p.category === projectFilter);
 
-  // Fetch projects on component mount
+  useEffect(() => { fetchGithubProjects(); }, []); // eslint-disable-line react-hooks/exhaustive-deps
+
   useEffect(() => {
-    fetchGithubProjects();
+    const id = setInterval(() => setCursorVisible(v => !v), 530);
+    return () => clearInterval(id);
   }, []);
 
-  // Scroll effects
   useEffect(() => {
     const handleScroll = () => {
       setIsScrolled(window.scrollY > 50);
-
-      const sections = ['home', 'about', 'experience', 'skills', 'projects', 'contact'];
-      const currentSection = sections.find(section => {
-        const element = document.getElementById(section);
-        if (element) {
-          const rect = element.getBoundingClientRect();
-          return rect.top <= 100 && rect.bottom >= 100;
-        }
+      const sections = ['home', 'about', 'experience', 'skills', 'projects', 'certifications', 'contact'];
+      const current = sections.find(s => {
+        const el = document.getElementById(s);
+        if (el) { const r = el.getBoundingClientRect(); return r.top <= 100 && r.bottom >= 100; }
         return false;
       });
-
-      if (currentSection) {
-        setActiveSection(currentSection);
-      }
+      if (current) setActiveSection(current);
     };
-
     window.addEventListener('scroll', handleScroll);
     return () => window.removeEventListener('scroll', handleScroll);
   }, []);
 
-  // Role rotation
   useEffect(() => {
-    const interval = setInterval(() => {
+    const id = setInterval(() => {
       setIsTyping(false);
-      setTimeout(() => {
-        setCurrentRole((prev) => (prev + 1) % roles.length);
-        setIsTyping(true);
-      }, 500);
+      setTimeout(() => { setCurrentRole(p => (p + 1) % roles.length); setIsTyping(true); }, 400);
     }, 3000);
-
-    return () => clearInterval(interval);
+    return () => clearInterval(id);
   }, [roles.length]);
 
-  // Dark mode effect
   useEffect(() => {
-    if (darkMode) {
-      document.documentElement.classList.add('dark');
-    } else {
-      document.documentElement.classList.remove('dark');
-    }
+    document.documentElement.classList.toggle('dark', darkMode);
   }, [darkMode]);
 
-  const scrollToSection = (sectionId) => {
-    document.getElementById(sectionId)?.scrollIntoView({ behavior: 'smooth' });
+  const scrollTo = id => document.getElementById(id)?.scrollIntoView({ behavior: 'smooth' });
+  const formatDate = str => new Date(str).toLocaleDateString('en-US', { year: 'numeric', month: 'short' });
+
+  const langColor = (lang, color) => {
+    if (color) return color;
+    return { JavaScript: '#f1e05a', TypeScript: '#2b7489', Python: '#3572A5', 'C++': '#f34b7d', R: '#198CE7' }[lang] || '#8b949e';
   };
 
-  const formatDate = (dateString) => {
-    const date = new Date(dateString);
-    return date.toLocaleDateString('en-US', {
-      year: 'numeric',
-      month: 'short'
-    });
-  };
+  const bg = darkMode ? '#050b14' : '#f8fafc';
+  const bgCard = darkMode ? '#0b1628' : '#ffffff';
+  const bgAlt = darkMode ? '#070d1a' : '#ffffff';
+  const textMain = darkMode ? '#cdd9e5' : '#1e293b';
+  const textMuted = darkMode ? '#8b949e' : '#64748b';
+  const textDim = darkMode ? '#4b5563' : '#94a3b8';
+  const borderBase = darkMode ? 'rgba(0,212,255,0.12)' : 'rgba(0,0,0,0.1)';
+  const cyan = '#00d4ff';
+  const green = '#00ff88';
 
-  const getLanguageColor = (language, languageColor) => {
-    if (languageColor) return languageColor;
-    const colors = {
-      'JavaScript': '#f1e05a',
-      'TypeScript': '#2b7489',
-      'Python': '#3572A5',
-      'Java': '#b07219',
-      'C++': '#f34b7d',
-      'HTML': '#e34c26',
-      'CSS': '#1563e0',
-      'R': '#198CE7'
-    };
-    return colors[language] || '#8b949e';
-  };
-
-  // Component definitions
-  const SkillCard = ({ category, data, index }) => {
-    const Icon = data.icon;
-
-    return (
-      <div className={`group relative p-6 rounded-2xl bg-gradient-to-br ${data.color} transform transition-all duration-500 hover:scale-105 hover:rotate-1 cursor-pointer`}>
-        <div className="absolute inset-0 bg-black/20 rounded-2xl opacity-0 group-hover:opacity-100 transition-opacity duration-300" />
-        <div className="relative z-10">
-          <div className="flex items-center mb-4">
-            <Icon className="h-8 w-8 text-white mr-3" />
-            <h3 className="text-xl font-bold text-white">{category}</h3>
-          </div>
-          <div className="flex flex-wrap gap-2">
-            {data.items.map((skill, idx) => (
-              <span
-                key={idx}
-                className="px-3 py-1 bg-white/20 backdrop-blur-sm rounded-full text-sm text-white font-medium transition-all duration-300 group-hover:scale-110"
-              >
-                {skill}
-              </span>
-            ))}
-          </div>
-        </div>
-      </div>
-    );
-  };
-
-  const ExperienceCard = ({ exp }) => (
-    <div className="relative p-6 bg-white dark:bg-gray-800 rounded-2xl shadow-xl hover:shadow-2xl transition-all duration-500 transform hover:scale-105 border-l-4 border-blue-500">
-      <div className="flex justify-between items-start mb-4">
-        <div>
-          <h3 className="text-xl font-bold text-gray-900 dark:text-white mb-2">
-            {exp.title}
-          </h3>
-          <p className="text-lg font-semibold text-blue-600 dark:text-blue-400">
-            {exp.company}
-          </p>
-          <p className="text-gray-600 dark:text-gray-300 flex items-center">
-            <MapPin className="h-4 w-4 mr-1" />
-            {exp.location}
-          </p>
-        </div>
-        <div className="text-right">
-          <span className="px-3 py-1 bg-blue-100 dark:bg-blue-900 text-blue-800 dark:text-blue-200 rounded-full text-sm font-medium">
-            {exp.type}
-          </span>
-          <p className="text-sm text-gray-500 dark:text-gray-400 mt-2 flex items-center">
-            <Calendar className="h-4 w-4 mr-1" />
-            {exp.period}
-          </p>
-        </div>
-      </div>
-      <div className="space-y-2">
-        {exp.achievements.map((achievement, idx) => (
-          <div key={idx} className="flex items-start">
-            <ArrowRight className="h-4 w-4 text-blue-500 mr-2 mt-0.5 flex-shrink-0" />
-            <p className="text-gray-700 dark:text-gray-300 text-sm">{achievement}</p>
-          </div>
-        ))}
-      </div>
+  const SectionHeader = ({ num, title }) => (
+    <div className="flex items-center gap-4 mb-16">
+      <span className="font-mono text-2xl font-bold" style={{ color: cyan }}>{num}.</span>
+      <h2 className="text-3xl font-bold" style={{ color: textMain }}>{title}</h2>
+      <div className="flex-1 h-px" style={{ background: borderBase }} />
     </div>
   );
 
-  const ProjectCard = ({ project }) => (
-    <div className="group relative bg-white dark:bg-gray-800 rounded-2xl overflow-hidden shadow-xl hover:shadow-2xl transition-all duration-500 transform hover:scale-105">
-      <div className="absolute top-0 left-0 w-full h-1 bg-gradient-to-r from-blue-500 to-purple-600"></div>
-      <div className="p-6">
-        <div className="flex justify-between items-start mb-4">
-          <h3 className="text-xl font-bold text-gray-900 dark:text-white group-hover:text-blue-600 transition-colors">
-            {project.title}
-          </h3>
-          <div className="flex space-x-2">
-            {project.homepage && (
-              <a href={project.homepage} target="_blank" rel="noopener noreferrer">
-                <ExternalLink className="h-5 w-5 text-gray-400 hover:text-blue-500 transition-colors cursor-pointer" />
-              </a>
-            )}
-            <a href={project.html_url} target="_blank" rel="noopener noreferrer">
-              <Github className="h-5 w-5 text-gray-400 hover:text-blue-500 transition-colors cursor-pointer" />
-            </a>
-          </div>
-        </div>
-
-        <p className="text-gray-600 dark:text-gray-300 mb-4 text-sm leading-relaxed">
-          {project.description}
-        </p>
-
-        <div className="flex flex-wrap gap-2 mb-4">
-          {project.language && (
-            <span
-              className="px-2 py-1 rounded text-xs font-medium flex items-center"
-              style={{
-                backgroundColor: darkMode ? 'rgba(255, 255, 255, 0.1)' : 'rgba(0, 0, 0, 0.1)',
-                color: getLanguageColor(project.language, project.languageColor)
-              }}
-            >
-              <span
-                className="w-2 h-2 rounded-full mr-1"
-                style={{ backgroundColor: getLanguageColor(project.language, project.languageColor) }}
-              ></span>
-              {project.language}
-            </span>
-          )}
-          {project.topics && project.topics.slice(0, 3).map((topic, idx) => (
-            <span key={idx} className="px-2 py-1 bg-blue-100 dark:bg-blue-900 text-blue-800 dark:text-blue-200 rounded text-xs font-medium">
-              {topic}
-            </span>
-          ))}
-        </div>
-
-        <div className="flex justify-between items-center text-sm">
-          <div className="flex space-x-4">
-            <div className="flex items-center text-gray-500 dark:text-gray-400">
-              <Star className="h-4 w-4 mr-1" />
-              {project.stars || 0}
-            </div>
-            <div className="flex items-center text-gray-500 dark:text-gray-400">
-              <GitFork className="h-4 w-4 mr-1" />
-              {project.forks || 0}
-            </div>
-          </div>
-          <div className="text-xs text-gray-400 dark:text-gray-500">
-            Updated {formatDate(project.updated_at)}
-          </div>
-        </div>
-      </div>
-    </div>
-  );
-
-  const LoadingCard = () => (
-    <div className="p-6 bg-gray-200 dark:bg-gray-800 rounded-2xl animate-pulse">
-      <div className="h-6 bg-gray-300 dark:bg-gray-700 rounded mb-4"></div>
-      <div className="h-4 bg-gray-300 dark:bg-gray-700 rounded mb-2"></div>
-      <div className="h-4 bg-gray-300 dark:bg-gray-700 rounded mb-4 w-3/4"></div>
-      <div className="flex space-x-2">
-        <div className="h-6 w-16 bg-gray-300 dark:bg-gray-700 rounded"></div>
-        <div className="h-6 w-16 bg-gray-300 dark:bg-gray-700 rounded"></div>
-      </div>
-    </div>
-  );
+  const navItems = ['home', 'about', 'experience', 'skills', 'projects', 'certifications', 'contact'];
 
   return (
-    <div className={`min-h-screen transition-colors duration-300 ${darkMode ? 'dark bg-gray-900' : 'bg-gray-50'}`}>
+    <div style={{ background: bg, color: textMain, minHeight: '100vh', transition: 'background 0.3s, color 0.3s' }}>
 
-      {/* Navigation */}
-      <nav className={`fixed top-0 w-full z-50 transition-all duration-300 ${isScrolled
-        ? 'bg-white/90 dark:bg-gray-900/90 backdrop-blur-md shadow-lg'
-        : 'bg-transparent'
-        }`}>
-        <div className="container mx-auto px-6 py-4">
-          <div className="flex justify-between items-center">
-            <div className="text-2xl font-bold text-gradient">
-              Taha Shah
-            </div>
+      {/* ── NAV ────────────────────────────────── */}
+      <nav style={{
+        position: 'fixed', top: 0, width: '100%', zIndex: 50,
+        background: isScrolled ? (darkMode ? 'rgba(5,11,20,0.95)' : 'rgba(248,250,252,0.95)') : 'transparent',
+        borderBottom: isScrolled ? `1px solid ${borderBase}` : 'none',
+        backdropFilter: isScrolled ? 'blur(12px)' : 'none',
+        transition: 'all 0.3s',
+      }}>
+        <div className="container mx-auto px-6 py-4 flex justify-between items-center">
+          <span className="font-mono text-lg font-bold" style={{ color: cyan }}>
+            <span style={{ color: textDim }}>~/</span>taha-shah
+          </span>
 
-            <div className="hidden md:flex space-x-8">
-              {['home', 'about', 'experience', 'skills', 'projects', 'contact'].map((item) => (
-                <button
-                  key={item}
-                  onClick={() => scrollToSection(item)}
-                  className={`capitalize font-medium transition-all duration-300 hover:text-blue-600 ${activeSection === item
-                    ? 'text-blue-600 border-b-2 border-blue-600'
-                    : 'text-gray-700 dark:text-gray-300'
-                    }`}
-                >
-                  {item}
-                </button>
-              ))}
-            </div>
-
-            <div className="flex items-center space-x-4">
-              <button
-                onClick={() => setParticlesEnabled(!particlesEnabled)}
-                className="p-2 rounded-full hover:bg-gray-200 dark:hover:bg-gray-700 transition-colors"
-              >
-                {particlesEnabled ? <Pause className="h-5 w-5" /> : <Play className="h-5 w-5" />}
+          <div className="hidden md:flex space-x-6">
+            {navItems.map(item => (
+              <button key={item} onClick={() => scrollTo(item)}
+                className="capitalize font-mono text-sm transition-all duration-200"
+                style={{
+                  color: activeSection === item ? cyan : textMuted,
+                  borderBottom: `1px solid ${activeSection === item ? cyan : 'transparent'}`,
+                  paddingBottom: '2px',
+                }}>
+                {item}
               </button>
-              <button
-                onClick={() => setDarkMode(!darkMode)}
-                className="p-2 rounded-full hover:bg-gray-200 dark:hover:bg-gray-700 transition-colors"
-              >
-                {darkMode ? '☀️' : '🌙'}
-              </button>
-            </div>
+            ))}
           </div>
+
+          <button onClick={() => setDarkMode(!darkMode)}
+            className="font-mono text-xs px-3 py-1.5 rounded transition-all duration-200"
+            style={{ border: `1px solid ${borderBase}`, color: textMuted }}>
+            {darkMode ? '[ light ]' : '[ dark ]'}
+          </button>
         </div>
       </nav>
 
-      {/* Hero Section */}
-      <section id="home" className="relative min-h-screen flex items-center justify-center overflow-hidden">
-        <div className="absolute inset-0 bg-gradient-to-br from-blue-900/20 via-purple-900/20 to-pink-900/20" />
+      {/* ── HERO ───────────────────────────────── */}
+      <section id="home" style={{
+        minHeight: '100vh', display: 'flex', alignItems: 'center', justifyContent: 'center',
+        position: 'relative', overflow: 'hidden',
+        background: darkMode
+          ? `radial-gradient(ellipse at 20% 50%, rgba(0,212,255,0.06) 0%, transparent 55%),
+             radial-gradient(ellipse at 80% 20%, rgba(0,255,136,0.04) 0%, transparent 45%),
+             #050b14`
+          : `radial-gradient(ellipse at 20% 50%, rgba(59,130,246,0.06) 0%, transparent 55%), #f8fafc`,
+      }}>
+        {/* dot grid */}
+        <div style={{
+          position: 'absolute', inset: 0, opacity: 0.35,
+          backgroundImage: `radial-gradient(${darkMode ? 'rgba(0,212,255,0.4)' : 'rgba(0,0,0,0.25)'} 1px, transparent 1px)`,
+          backgroundSize: '32px 32px',
+        }} />
 
-        <div className="relative z-10 text-center px-6 max-w-4xl mx-auto">
-          <div className="mb-8">
-            <h1 className="text-5xl md:text-7xl font-bold text-gray-900 dark:text-white mb-6 animate-fade-in">
-              Hi, I'm <span className="text-gradient">Taha Shah</span>
-            </h1>
-
-            <div className="text-2xl md:text-3xl font-semibold text-gray-700 dark:text-gray-300 mb-6 h-12 flex items-center justify-center">
-              <span className={`transition-all duration-500 ${isTyping ? 'opacity-100' : 'opacity-0'}`}>
-                {roles[currentRole]}
-              </span>
-            </div>
-
-            <p className="text-lg text-gray-600 dark:text-gray-400 mb-8 max-w-2xl mx-auto leading-relaxed">
-              Passionate about transforming data into actionable insights through advanced machine learning,
-              statistical analysis, and innovative AI solutions. Bachelor's Degree in Computer Science from FAST NUCES.
-            </p>
+        <div style={{ position: 'relative', zIndex: 10, textAlign: 'center', padding: '0 24px', maxWidth: '860px', margin: '0 auto' }}>
+          {/* terminal prompt */}
+          <div className="font-mono text-sm mb-6 flex justify-center items-center gap-2">
+            <span style={{ color: cyan }}>$</span>
+            <span style={{ color: green }}>whoami</span>
           </div>
 
-          <div className="flex flex-col sm:flex-row gap-4 justify-center items-center mb-12">
-            <button
-              onClick={() => scrollToSection('projects')}
-              className="px-8 py-4 bg-gradient-to-r from-blue-600 to-purple-600 text-white font-semibold rounded-full hover:scale-105 transform transition-all duration-300 shadow-lg hover:shadow-xl"
-            >
-              View My Work
-            </button>
+          <h1 className="font-bold mb-4" style={{ fontSize: 'clamp(2.8rem, 8vw, 5rem)', letterSpacing: '-2px', lineHeight: 1.1 }}>
+            <span style={{ color: textMain }}>Taha </span>
+            <span style={{
+              background: `linear-gradient(135deg, ${cyan}, ${green})`,
+              WebkitBackgroundClip: 'text', WebkitTextFillColor: 'transparent', backgroundClip: 'text',
+            }}>Shah</span>
+          </h1>
 
-            <button
-              onClick={() => scrollToSection('contact')}
-              className="px-8 py-4 border-2 border-blue-600 text-blue-600 dark:text-blue-400 font-semibold rounded-full hover:bg-blue-600 hover:text-white transition-all duration-300"
-            >
-              Get In Touch
-            </button>
+          <div className="font-mono font-semibold mb-6 flex items-center justify-center"
+            style={{ fontSize: 'clamp(1rem, 3vw, 1.5rem)', height: '2.2rem', color: cyan }}>
+            <span style={{ opacity: isTyping ? 1 : 0, transition: 'opacity 0.4s' }}>{roles[currentRole]}</span>
+            <span style={{
+              display: 'inline-block', width: '2px', height: '1.2em', marginLeft: '4px',
+              background: cyan, opacity: cursorVisible ? 1 : 0, transition: 'opacity 0.08s', verticalAlign: 'middle',
+            }} />
+          </div>
 
-            <a
-              href="https://drive.google.com/file/d/1leTK4WXWysR-9Ga2anYLPydbYDaFscHE/view?usp=sharing"
-              target="_blank"
-              rel="noopener noreferrer"
-            >
-              <button className="px-8 py-4 bg-gray-200 dark:bg-gray-700 text-gray-700 dark:text-gray-300 font-semibold rounded-full hover:bg-gray-300 dark:hover:bg-gray-600 transition-all duration-300 flex items-center">
-                <Download className="h-5 w-5 mr-2" />
-                Download CV
+          <p className="text-lg mb-10 max-w-2xl mx-auto leading-relaxed" style={{ color: textMuted }}>
+            AI &amp; software engineer with 3+ years building ML systems, automation pipelines, and
+            data-driven applications across multiple industries. BS Computer Science, FAST-NUCES (GPA 3.7/4.0).
+          </p>
+
+          <div className="flex flex-col sm:flex-row gap-4 justify-center items-center mb-10">
+            {[
+              { label: '> view_projects()', action: () => scrollTo('projects'), primary: true },
+              { label: '> get_in_touch()', action: () => scrollTo('contact'), primary: false },
+            ].map(({ label, action, primary }) => (
+              <button key={label} onClick={action}
+                className="px-8 py-3 rounded font-mono font-semibold text-sm transition-all duration-300"
+                style={{
+                  border: `1px solid ${primary ? cyan : (darkMode ? 'rgba(0,255,136,0.45)' : 'rgba(59,130,246,0.45)')}`,
+                  color: primary ? cyan : (darkMode ? green : '#3b82f6'),
+                  background: primary ? `rgba(0,212,255,0.07)` : 'transparent',
+                  boxShadow: primary ? `0 0 18px rgba(0,212,255,0.12)` : 'none',
+                }}>
+                {label}
+              </button>
+            ))}
+            <a href="https://drive.google.com/file/d/1leTK4WXWysR-9Ga2anYLPydbYDaFscHE/view?usp=sharing"
+              target="_blank" rel="noopener noreferrer">
+              <button className="px-8 py-3 rounded font-mono text-sm flex items-center gap-2 transition-all duration-200"
+                style={{ border: `1px solid ${borderBase}`, color: textMuted }}>
+                <Download className="h-4 w-4" /> download_cv
               </button>
             </a>
           </div>
 
-          <div className="flex justify-center space-x-6">
-            <a href="mailto:tahashah366@gmail.com" className="p-3 bg-white/10 backdrop-blur-sm rounded-full hover:bg-white/20 transition-all duration-300 hover:scale-110">
-              <Mail className="h-6 w-6 text-blue-600" />
-            </a>
-            <a href="https://linkedin.com/in/taha-shah123" className="p-3 bg-white/10 backdrop-blur-sm rounded-full hover:bg-white/20 transition-all duration-300 hover:scale-110">
-              <Linkedin className="h-6 w-6 text-blue-600" />
-            </a>
-            <a href="https://github.com/TAHASHAH12/" className="p-3 bg-white/10 backdrop-blur-sm rounded-full hover:bg-white/20 transition-all duration-300 hover:scale-110">
-              <Github className="h-6 w-6 text-blue-600" />
-            </a>
+          <div className="flex justify-center gap-3">
+            {[
+              { href: 'mailto:tahashah366@gmail.com', Icon: Mail, label: 'email' },
+              { href: 'https://linkedin.com/in/TAHASHAH12', Icon: Linkedin, label: 'linkedin' },
+              { href: 'https://github.com/taha-shah123', Icon: Github, label: 'github' },
+            ].map(({ href, Icon, label }) => (
+              <a key={label} href={href} target="_blank" rel="noopener noreferrer"
+                className="flex flex-col items-center gap-1 px-4 py-3 rounded font-mono text-xs transition-all duration-200"
+                style={{ border: `1px solid ${borderBase}`, color: textMuted }}
+                onMouseEnter={e => { e.currentTarget.style.borderColor = cyan; e.currentTarget.style.color = cyan; }}
+                onMouseLeave={e => { e.currentTarget.style.borderColor = borderBase; e.currentTarget.style.color = textMuted; }}>
+                <Icon className="h-5 w-5" />
+                {label}
+              </a>
+            ))}
           </div>
         </div>
 
-        <div className="absolute bottom-8 left-1/2 transform -translate-x-1/2 animate-bounce">
-          <ChevronDown className="h-8 w-8 text-blue-600" />
+        <div style={{ position: 'absolute', bottom: '32px', left: '50%', transform: 'translateX(-50%)' }}
+          className="animate-bounce">
+          <ChevronDown className="h-6 w-6" style={{ color: cyan }} />
         </div>
       </section>
 
-      {/* About Section */}
-      <section id="about" className="py-20 px-6">
+      {/* ── ABOUT ──────────────────────────────── */}
+      <section id="about" className="py-20 px-6" style={{ background: bgAlt }}>
         <div className="container mx-auto max-w-6xl">
-          <h2 className="text-4xl font-bold text-center mb-16 text-gradient">
-            About Me
-          </h2>
+          <SectionHeader num="01" title="About Me" />
 
           <div className="grid lg:grid-cols-2 gap-12 items-center">
-            <div className="space-y-6">
-              <p className="text-lg text-gray-700 dark:text-gray-300 leading-relaxed">
-                I'm a passionate Data Scientist and Machine Learning Engineer with a strong foundation in
-                computer science and hands-on experience in building scalable ML solutions. My expertise
-                spans from data preprocessing and feature engineering to deploying production-ready models.
+            <div className="space-y-5">
+              <p className="leading-relaxed" style={{ color: textMuted }}>
+                Results-driven AI and software engineer with{' '}
+                <strong style={{ color: textMain }}>3+ years of experience</strong> building ML systems,
+                automation pipelines, and data-driven applications across multiple industries.
+              </p>
+              <p className="leading-relaxed" style={{ color: textMuted }}>
+                Proven ability to translate business problems into practical technical solutions and deliver{' '}
+                <strong style={{ color: textMain }}>end-to-end AI integrations</strong>. Strong background
+                in Python, SQL, cloud platforms, and applied ML with hands-on experience deploying systems
+                that reduce manual effort and improve decision-making.
+              </p>
+              <p className="leading-relaxed" style={{ color: textMuted }}>
+                BS Computer Science from <strong style={{ color: cyan }}>FAST-NUCES</strong>, graduating
+                June 2025 with a GPA of <strong style={{ color: green }}>3.7 / 4.0</strong>.
               </p>
 
-              <p className="text-lg text-gray-700 dark:text-gray-300 leading-relaxed">
-            Proven expertise in developing data-driven
-solutions, creating interactive dashboards, and implementing ML models that drive business impact. Profi
-cient in Python, TensorFlow, SQL, and advanced analytics with demonstrated success in feature engineering,
-model optimization, and computer vision applications
-              </p>
-
-              <div className="grid grid-cols-2 gap-4 mt-8">
-                <div className="text-center p-4 bg-white dark:bg-gray-800 rounded-xl shadow-lg">
-                  <div className="text-3xl font-bold text-blue-600 mb-2">{githubProjects.length}+</div>
-                  <div className="text-sm text-gray-600 dark:text-gray-400">GitHub Projects</div>
-                </div>
-                <div className="text-center p-4 bg-white dark:bg-gray-800 rounded-xl shadow-lg">
-                  <div className="text-3xl font-bold text-purple-600 mb-2">
-                    {githubProjects.reduce((acc, project) => acc + (project.stars || 0), 0)}
+              <div className="grid grid-cols-2 gap-4 pt-4">
+                {[
+                  { value: '3+', label: 'Years Experience', color: cyan },
+                  { value: '4', label: 'Companies Worked', color: green },
+                  { value: '25%', label: 'Avg. Model Uplift', color: '#a855f7' },
+                  { value: '3.7', label: 'GPA / 4.0', color: '#f59e0b' },
+                ].map(({ value, label, color }) => (
+                  <div key={label} className="p-4 rounded-lg text-center"
+                    style={{ background: `${color}08`, border: `1px solid ${color}28` }}>
+                    <div className="text-3xl font-bold font-mono mb-1" style={{ color }}>{value}</div>
+                    <div className="text-xs" style={{ color: textDim }}>{label}</div>
                   </div>
-                  <div className="text-sm text-gray-600 dark:text-gray-400">GitHub Stars</div>
-                </div>
-                <div className="text-center p-4 bg-white dark:bg-gray-800 rounded-xl shadow-lg">
-                  <div className="text-3xl font-bold text-green-600 mb-2">10M+</div>
-                  <div className="text-sm text-gray-600 dark:text-gray-400">Data Points Processed</div>
-                </div>
-                <div className="text-center p-4 bg-white dark:bg-gray-800 rounded-xl shadow-lg">
-                  <div className="text-3xl font-bold text-orange-600 mb-2">3+</div>
-                  <div className="text-sm text-gray-600 dark:text-gray-400">Years Experience</div>
-                </div>
-              </div>
-            </div>
-
-            <div className="relative">
-              <div className="w-full h-96 bg-gradient-to-br from-blue-500 to-purple-600 rounded-2xl relative overflow-hidden">
-                <div className="absolute inset-0 bg-black/20" />
-                <div className="absolute inset-0 flex items-center justify-center">
-                  <div className="text-center text-white">
-                    <Brain className="h-24 w-24 mx-auto mb-4 opacity-80" />
-                    <h3 className="text-2xl font-bold mb-2">AI/ML Focused</h3>
-                    <p className="text-lg opacity-90">Building intelligent solutions</p>
-                  </div>
-                </div>
-              </div>
-            </div>
-          </div>
-        </div>
-      </section>
-
-      {/* Experience Section */}
-      <section id="experience" className="py-20 px-6 bg-white dark:bg-gray-800">
-        <div className="container mx-auto max-w-6xl">
-          <h2 className="text-4xl font-bold text-center mb-16 text-gradient">
-            Professional Experience
-          </h2>
-
-          <div className="grid lg:grid-cols-2 gap-8">
-            {experiences.map((exp, index) => (
-              <ExperienceCard key={index} exp={exp} />
-            ))}
-          </div>
-        </div>
-      </section>
-
-      {/* Skills Section */}
-      <section id="skills" className="py-20 px-6">
-        <div className="container mx-auto max-w-6xl">
-          <h2 className="text-4xl font-bold text-center mb-16 text-gradient">
-            Technical Expertise
-          </h2>
-
-          <div className="grid md:grid-cols-2 lg:grid-cols-4 gap-6">
-            {Object.entries(skills).map(([category, data], index) => (
-              <SkillCard key={category} category={category} data={data} index={index} />
-            ))}
-          </div>
-        </div>
-      </section>
-
-      {/* Projects Section */}
-      <section id="projects" className="py-20 px-6 bg-white dark:bg-gray-800">
-        <div className="container mx-auto max-w-6xl">
-          <h2 className="text-4xl font-bold text-center mb-8 text-gradient">
-            Featured Projects
-          </h2>
-
-          {/* Error Display */}
-          {error && (
-            <div className="text-center mb-8">
-              <div className={`inline-flex items-center px-4 py-2 rounded-lg text-sm ${error.includes('sample') || error.includes('fallback')
-                ? 'bg-yellow-100 dark:bg-yellow-900/20 text-yellow-800 dark:text-yellow-200'
-                : 'bg-red-100 dark:bg-red-900/20 text-red-800 dark:text-red-200'
-                }`}>
-                <AlertCircle className="h-4 w-4 mr-2" />
-                {error}
-              </div>
-              {apiStats.remaining !== null && (
-                <p className="text-xs mt-2 text-gray-500 dark:text-gray-400">
-                  API Rate Limit: {apiStats.remaining}/{apiStats.limit}
-                </p>
-              )}
-            </div>
-          )}
-
-          {/* Filter Buttons */}
-          <div className="flex justify-center mb-12">
-            <div className="w-full max-w-4xl">
-              <div className="flex flex-wrap justify-center items-center gap-3 bg-gray-100 dark:bg-gray-700 rounded-full p-3">
-                {getProjectCategories().map((filter) => (
-                  <button
-                    key={filter}
-                    onClick={() => setProjectFilter(filter)}
-                    className={`px-4 py-2 rounded-full capitalize font-medium transition-all duration-300 text-sm whitespace-nowrap ${projectFilter === filter
-                      ? 'bg-blue-600 text-white shadow-lg transform scale-105'
-                      : 'text-gray-600 dark:text-gray-300 hover:text-blue-600 hover:bg-gray-200 dark:hover:bg-gray-600'
-                      }`}
-                  >
-                    {filter === 'all' ? 'All Projects' : filter.replace('-', ' ')}
-                  </button>
                 ))}
               </div>
             </div>
+
+            {/* Code block */}
+            <div className="p-6 rounded-xl font-mono text-sm"
+              style={{ background: darkMode ? '#0b1628' : '#1e293b', border: `1px solid ${borderBase}` }}>
+              <div className="flex items-center gap-2 mb-5">
+                <div className="w-3 h-3 rounded-full bg-red-500 opacity-80" />
+                <div className="w-3 h-3 rounded-full bg-yellow-500 opacity-80" />
+                <div className="w-3 h-3 rounded-full bg-green-500 opacity-80" />
+                <span className="ml-2 text-xs" style={{ color: '#4b5563' }}>taha@portfolio ~ profile.ts</span>
+              </div>
+              <div className="space-y-1 text-xs leading-relaxed">
+                <div><span style={{ color: '#569cd6' }}>const</span> <span style={{ color: green }}>engineer</span><span style={{ color: '#cdd9e5' }}> = {'{'}</span></div>
+                <div className="pl-4"><span style={{ color: '#9cdcfe' }}>name</span><span style={{ color: '#cdd9e5' }}>: </span><span style={{ color: '#ce9178' }}>"Taha Shah"</span><span style={{ color: '#cdd9e5' }}>,</span></div>
+                <div className="pl-4"><span style={{ color: '#9cdcfe' }}>role</span><span style={{ color: '#cdd9e5' }}>: </span><span style={{ color: '#ce9178' }}>"AI Solutions Engineer &amp; Consultant"</span><span style={{ color: '#cdd9e5' }}>,</span></div>
+                <div className="pl-4"><span style={{ color: '#9cdcfe' }}>location</span><span style={{ color: '#cdd9e5' }}>: </span><span style={{ color: '#ce9178' }}>"Karachi, Pakistan"</span><span style={{ color: '#cdd9e5' }}>,</span></div>
+                <div className="pl-4"><span style={{ color: '#9cdcfe' }}>experience</span><span style={{ color: '#cdd9e5' }}>: </span><span style={{ color: cyan }}>3</span><span style={{ color: '#6a9955' }}>, // years</span></div>
+                <div className="pl-4"><span style={{ color: '#9cdcfe' }}>stack</span><span style={{ color: '#cdd9e5' }}>: [</span></div>
+                <div className="pl-8"><span style={{ color: '#ce9178' }}>"Python"</span><span style={{ color: '#cdd9e5' }}>, </span><span style={{ color: '#ce9178' }}>"TensorFlow"</span><span style={{ color: '#cdd9e5' }}>, </span><span style={{ color: '#ce9178' }}>"SQL"</span><span style={{ color: '#cdd9e5' }}>,</span></div>
+                <div className="pl-8"><span style={{ color: '#ce9178' }}>"PyTorch"</span><span style={{ color: '#cdd9e5' }}>, </span><span style={{ color: '#ce9178' }}>"AWS"</span><span style={{ color: '#cdd9e5' }}>, </span><span style={{ color: '#ce9178' }}>"Power BI"</span></div>
+                <div className="pl-4"><span style={{ color: '#cdd9e5' }}>],</span></div>
+                <div className="pl-4"><span style={{ color: '#9cdcfe' }}>openToWork</span><span style={{ color: '#cdd9e5' }}>: </span><span style={{ color: green }}>true</span></div>
+                <div><span style={{ color: '#cdd9e5' }}>{'}'}</span><span style={{ color: cyan }}>;</span></div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      {/* ── EXPERIENCE ─────────────────────────── */}
+      <section id="experience" className="py-20 px-6" style={{ background: bg }}>
+        <div className="container mx-auto max-w-5xl">
+          <SectionHeader num="02" title="Experience" />
+
+          <div style={{ position: 'relative' }}>
+            {/* timeline line */}
+            <div style={{
+              position: 'absolute', left: '15px', top: 0, bottom: 0, width: '1px',
+              background: `linear-gradient(to bottom, ${cyan}50, transparent)`,
+            }} />
+
+            <div className="space-y-8 pl-12">
+              {experiences.map((exp, i) => (
+                <div key={i} style={{ position: 'relative' }}>
+                  {/* dot */}
+                  <div style={{
+                    position: 'absolute', left: '-37px', top: '24px',
+                    width: '14px', height: '14px', borderRadius: '50%',
+                    background: cyan, border: `2px solid ${bg}`,
+                    boxShadow: `0 0 10px ${cyan}70`,
+                  }} />
+
+                  <div className="p-6 rounded-xl transition-all duration-300"
+                    style={{ background: bgCard, border: `1px solid ${borderBase}` }}
+                    onMouseEnter={e => { e.currentTarget.style.borderColor = `${cyan}40`; e.currentTarget.style.boxShadow = `0 0 20px rgba(0,212,255,0.07)`; }}
+                    onMouseLeave={e => { e.currentTarget.style.borderColor = borderBase; e.currentTarget.style.boxShadow = 'none'; }}>
+
+                    <div className="flex flex-wrap justify-between items-start gap-2 mb-4">
+                      <div>
+                        <h3 className="text-lg font-bold mb-1" style={{ color: textMain }}>{exp.title}</h3>
+                        <p className="font-semibold" style={{ color: cyan }}>{exp.company}</p>
+                        <p className="text-xs flex items-center gap-1 mt-1" style={{ color: textDim }}>
+                          <MapPin className="h-3 w-3" /> {exp.location}
+                        </p>
+                      </div>
+                      <div className="text-right">
+                        <span className="px-2 py-1 rounded text-xs font-mono"
+                          style={{ border: `1px solid ${cyan}35`, color: cyan, background: `${cyan}0a` }}>
+                          {exp.type}
+                        </span>
+                        <p className="text-xs mt-2 flex items-center gap-1 justify-end" style={{ color: textDim }}>
+                          <Calendar className="h-3 w-3" /> {exp.period}
+                        </p>
+                      </div>
+                    </div>
+
+                    <div className="space-y-2">
+                      {exp.achievements.map((a, idx) => (
+                        <div key={idx} className="flex items-start gap-2">
+                          <span className="font-mono text-sm mt-0.5 flex-shrink-0" style={{ color: green }}>›</span>
+                          <p className="text-sm leading-relaxed" style={{ color: textMuted }}>{a}</p>
+                        </div>
+                      ))}
+                    </div>
+                  </div>
+                </div>
+              ))}
+            </div>
+          </div>
+        </div>
+      </section>
+
+      {/* ── SKILLS ─────────────────────────────── */}
+      <section id="skills" className="py-20 px-6" style={{ background: bgAlt }}>
+        <div className="container mx-auto max-w-6xl">
+          <SectionHeader num="03" title="Technical Skills" />
+
+          <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-5">
+            {Object.entries(skills).map(([category, data]) => {
+              const Icon = data.icon;
+              return (
+                <div key={category} className="p-6 rounded-xl transition-all duration-300"
+                  style={{ background: bgCard, border: `1px solid ${data.accent}22` }}
+                  onMouseEnter={e => { e.currentTarget.style.borderColor = `${data.accent}50`; e.currentTarget.style.boxShadow = `0 0 22px ${data.accent}18`; }}
+                  onMouseLeave={e => { e.currentTarget.style.borderColor = `${data.accent}22`; e.currentTarget.style.boxShadow = 'none'; }}>
+
+                  <div className="flex items-center gap-3 mb-4">
+                    <div className="p-2 rounded" style={{ background: `${data.accent}12`, border: `1px solid ${data.accent}28` }}>
+                      <Icon className="h-5 w-5" style={{ color: data.accent }} />
+                    </div>
+                    <h3 className="font-mono text-sm font-semibold" style={{ color: data.accent }}>{category}</h3>
+                  </div>
+
+                  <div className="flex flex-wrap gap-2">
+                    {data.items.map((skill, idx) => (
+                      <span key={idx} className="px-2 py-1 rounded text-xs font-mono"
+                        style={{ background: `${data.accent}0c`, border: `1px solid ${data.accent}22`, color: textMuted }}>
+                        {skill}
+                      </span>
+                    ))}
+                  </div>
+                </div>
+              );
+            })}
+          </div>
+        </div>
+      </section>
+
+      {/* ── PROJECTS ───────────────────────────── */}
+      <section id="projects" className="py-20 px-6" style={{ background: bg }}>
+        <div className="container mx-auto max-w-6xl">
+          <SectionHeader num="04" title="Projects" />
+
+          {error && (
+            <div className="text-center mb-8">
+              <div className="inline-flex items-center gap-2 px-4 py-2 rounded text-xs font-mono"
+                style={{ background: 'rgba(245,158,11,0.08)', border: '1px solid rgba(245,158,11,0.28)', color: '#f59e0b' }}>
+                <AlertCircle className="h-3 w-3" /> {error}
+              </div>
+            </div>
+          )}
+
+          <div className="flex gap-2 flex-wrap mb-8">
+            {getProjectCategories().map(filter => (
+              <button key={filter} onClick={() => setProjectFilter(filter)}
+                className="px-3 py-1 rounded text-xs font-mono transition-all duration-200"
+                style={{
+                  background: projectFilter === filter ? `${cyan}12` : 'transparent',
+                  border: `1px solid ${projectFilter === filter ? cyan : borderBase}`,
+                  color: projectFilter === filter ? cyan : textMuted,
+                }}>
+                {filter === 'all' ? '[ all ]' : `[ ${filter.replace('-', '_')} ]`}
+              </button>
+            ))}
           </div>
 
-          {/* Projects Grid */}
-          <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-8">
+          <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-5">
             {loading ? (
-              Array.from({ length: 6 }).map((_, index) => (
-                <LoadingCard key={index} />
+              Array.from({ length: 6 }).map((_, i) => (
+                <div key={i} className="p-6 rounded-xl animate-pulse"
+                  style={{ background: bgCard, border: `1px solid ${borderBase}` }}>
+                  <div className="h-5 rounded mb-3" style={{ background: darkMode ? '#1e3a5f' : '#e2e8f0' }} />
+                  <div className="h-4 rounded mb-2 w-3/4" style={{ background: darkMode ? '#1e3a5f' : '#e2e8f0' }} />
+                  <div className="h-4 rounded w-1/2" style={{ background: darkMode ? '#1e3a5f' : '#e2e8f0' }} />
+                </div>
               ))
             ) : filteredProjects.length > 0 ? (
-              filteredProjects.map((project) => (
-                <ProjectCard key={project.id} project={project} />
+              filteredProjects.map(project => (
+                <div key={project.id} className="p-6 rounded-xl transition-all duration-300 group"
+                  style={{
+                    background: bgCard,
+                    border: `1px solid ${borderBase}`,
+                    borderTop: `2px solid ${cyan}`,
+                  }}
+                  onMouseEnter={e => { e.currentTarget.style.boxShadow = `0 0 22px rgba(0,212,255,0.09)`; e.currentTarget.style.borderColor = `${cyan}40`; e.currentTarget.style.borderTopColor = cyan; }}
+                  onMouseLeave={e => { e.currentTarget.style.boxShadow = 'none'; e.currentTarget.style.borderColor = borderBase; e.currentTarget.style.borderTopColor = cyan; }}>
+
+                  <div className="flex justify-between items-start mb-3">
+                    <h3 className="font-bold text-sm leading-snug pr-2" style={{ color: textMain }}>{project.title}</h3>
+                    <div className="flex gap-2 flex-shrink-0">
+                      {project.homepage && (
+                        <a href={project.homepage} target="_blank" rel="noopener noreferrer">
+                          <ExternalLink className="h-4 w-4" style={{ color: textDim }}
+                            onMouseEnter={e => e.target.style.color = cyan}
+                            onMouseLeave={e => e.target.style.color = textDim} />
+                        </a>
+                      )}
+                      <a href={project.html_url} target="_blank" rel="noopener noreferrer">
+                        <Github className="h-4 w-4" style={{ color: textDim }}
+                          onMouseEnter={e => e.target.style.color = cyan}
+                          onMouseLeave={e => e.target.style.color = textDim} />
+                      </a>
+                    </div>
+                  </div>
+
+                  <p className="text-xs leading-relaxed mb-4" style={{ color: textMuted }}>{project.description}</p>
+
+                  <div className="flex flex-wrap gap-1 mb-4">
+                    {project.language && (
+                      <span className="px-2 py-0.5 rounded text-xs font-mono flex items-center gap-1"
+                        style={{
+                          background: `${langColor(project.language, project.languageColor)}18`,
+                          border: `1px solid ${langColor(project.language, project.languageColor)}38`,
+                          color: langColor(project.language, project.languageColor),
+                        }}>
+                        <span className="w-1.5 h-1.5 rounded-full"
+                          style={{ background: langColor(project.language, project.languageColor) }} />
+                        {project.language}
+                      </span>
+                    )}
+                    {project.topics.slice(0, 3).map((t, i) => (
+                      <span key={i} className="px-2 py-0.5 rounded text-xs font-mono"
+                        style={{ background: `${cyan}0a`, border: `1px solid ${cyan}22`, color: `${cyan}99` }}>
+                        {t}
+                      </span>
+                    ))}
+                  </div>
+
+                  <div className="flex justify-between text-xs font-mono" style={{ color: textDim }}>
+                    <div className="flex gap-3">
+                      <span className="flex items-center gap-1"><Star className="h-3 w-3" /> {project.stars}</span>
+                      <span className="flex items-center gap-1"><GitFork className="h-3 w-3" /> {project.forks}</span>
+                    </div>
+                    <span>{formatDate(project.updated_at)}</span>
+                  </div>
+                </div>
               ))
             ) : (
               <div className="col-span-full text-center py-12">
-                <Github className="h-16 w-16 mx-auto mb-4 text-gray-400 dark:text-gray-600" />
-                <p className="text-lg text-gray-600 dark:text-gray-400">
-                  No projects found for the selected category.
-                </p>
-                <button
-                  onClick={fetchGithubProjects}
-                  className="mt-4 inline-flex items-center px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors"
-                >
-                  <RefreshCw className="h-4 w-4 mr-2" />
-                  Retry Loading
+                <p className="font-mono text-sm" style={{ color: textDim }}>{'// no projects in this category'}</p>
+                <button onClick={fetchGithubProjects}
+                  className="mt-4 inline-flex items-center gap-2 px-4 py-2 rounded text-sm font-mono"
+                  style={{ border: `1px solid ${cyan}40`, color: cyan }}>
+                  <RefreshCw className="h-4 w-4" /> retry()
                 </button>
               </div>
             )}
           </div>
 
-          {/* GitHub Link */}
           {!loading && githubProjects.length > 0 && (
-            <div className="text-center mt-12">
-              <a
-                href={`https://github.com/${GITHUB_USERNAME}`}
-                target="_blank"
-                rel="noopener noreferrer"
-                className="inline-flex items-center px-8 py-4 bg-gray-900 text-white font-semibold rounded-full hover:bg-gray-800 transition-all duration-300 shadow-lg hover:shadow-xl"
-              >
-                <Github className="h-5 w-5 mr-2" />
-                View All Projects on GitHub
+            <div className="text-center mt-10">
+              <a href={`https://github.com/${GITHUB_USERNAME}`} target="_blank" rel="noopener noreferrer"
+                className="inline-flex items-center gap-2 px-6 py-3 rounded font-mono text-sm transition-all duration-200"
+                style={{ border: `1px solid ${cyan}35`, color: cyan }}
+                onMouseEnter={e => { e.currentTarget.style.background = `${cyan}0a`; e.currentTarget.style.boxShadow = `0 0 18px ${cyan}18`; }}
+                onMouseLeave={e => { e.currentTarget.style.background = 'transparent'; e.currentTarget.style.boxShadow = 'none'; }}>
+                <Github className="h-4 w-4" /> view_all_repos →
               </a>
             </div>
           )}
         </div>
       </section>
 
-      {/* Contact Section */}
-      <section id="contact" className="py-20 px-6 bg-gradient-to-br from-blue-900 to-purple-900 text-white">
-        <div className="container mx-auto max-w-4xl text-center">
-          <h2 className="text-4xl font-bold mb-8">Let's Build Something Amazing Together</h2>
-          <p className="text-xl mb-12 opacity-90">
-            Ready to transform your data into actionable insights? Let's discuss how we can leverage
-            machine learning and data science to solve your business challenges.
-          </p>
+      {/* ── CERTIFICATIONS ─────────────────────── */}
+      <section id="certifications" className="py-20 px-6" style={{ background: bgAlt }}>
+        <div className="container mx-auto max-w-6xl">
+          <SectionHeader num="05" title="Certifications" />
 
-          <div className="grid md:grid-cols-4 gap-6 mb-12">
-            <div className="p-6 bg-white/10 backdrop-blur-sm rounded-2xl hover:bg-white/20 transition-all duration-300">
-              <Mail className="h-8 w-8 mx-auto mb-4" />
-              <h3 className="font-semibold mb-2">Email</h3>
-              <p className="text-sm opacity-90">tahashah366@gmail.com</p>
-            </div>
-            <div className="p-6 bg-white/10 backdrop-blur-sm rounded-2xl hover:bg-white/20 transition-all duration-300">
-              <Phone className="h-8 w-8 mx-auto mb-4" />
-              <h3 className="font-semibold mb-2">Phone</h3>
-              <p className="text-sm opacity-90">+92 341 2188932</p>
-            </div>
-            <div className="p-6 bg-white/10 backdrop-blur-sm rounded-2xl hover:bg-white/20 transition-all duration-300">
-              <Linkedin className="h-8 w-8 mx-auto mb-4" />
-              <h3 className="font-semibold mb-2">LinkedIn</h3>
-              <p className="text-sm opacity-90">taha-shah123</p>
-            </div>
-            <div className="p-6 bg-white/10 backdrop-blur-sm rounded-2xl hover:bg-white/20 transition-all duration-300">
-              <MapPin className="h-8 w-8 mx-auto mb-4" />
-              <h3 className="font-semibold mb-2">Location</h3>
-              <p className="text-sm opacity-90">Karachi, Pakistan</p>
-            </div>
+          <div className="grid md:grid-cols-2 gap-5">
+            {certifications.map((cert, i) => (
+              <div key={i} className="flex items-center gap-4 p-5 rounded-xl transition-all duration-300"
+                style={{ background: bgCard, border: `1px solid ${borderBase}` }}
+                onMouseEnter={e => { e.currentTarget.style.borderColor = `${cyan}40`; e.currentTarget.style.boxShadow = `0 0 16px rgba(0,212,255,0.07)`; }}
+                onMouseLeave={e => { e.currentTarget.style.borderColor = borderBase; e.currentTarget.style.boxShadow = 'none'; }}>
+                <div className="flex-shrink-0 p-3 rounded-lg"
+                  style={{ background: `${cyan}10`, border: `1px solid ${cyan}28` }}>
+                  <Award className="h-6 w-6" style={{ color: cyan }} />
+                </div>
+                <div>
+                  <h3 className="font-semibold text-sm mb-1" style={{ color: textMain }}>{cert.name}</h3>
+                  <p className="text-xs font-mono" style={{ color: textDim }}>{cert.issuer}</p>
+                </div>
+              </div>
+            ))}
           </div>
-
-          <button
-            onClick={() => window.location.href = 'mailto:tahashah366@gmail.com'}
-            className="px-12 py-4 bg-white text-blue-900 font-bold rounded-full hover:scale-105 transform transition-all duration-300 shadow-lg hover:shadow-xl"
-          >
-            Start a Conversation
-          </button>
         </div>
       </section>
 
-      {/* Footer */}
-      <footer className="py-8 px-6 bg-gray-900 text-white text-center">
-        <p>&copy; 2025 Taha Shah. Built with React.js & Machine Learning in mind.</p>
+      {/* ── CONTACT ────────────────────────────── */}
+      <section id="contact" className="py-20 px-6"
+        style={{ background: bg, borderTop: `1px solid ${borderBase}` }}>
+        <div className="container mx-auto max-w-4xl text-center">
+          <div className="flex items-center justify-center gap-4 mb-8">
+            <span className="font-mono text-2xl font-bold" style={{ color: cyan }}>06.</span>
+            <h2 className="text-3xl font-bold" style={{ color: textMain }}>Get In Touch</h2>
+          </div>
+
+          <p className="text-lg mb-12 max-w-2xl mx-auto" style={{ color: textMuted }}>
+            Ready to transform your data into actionable insights? Let's discuss how we can leverage
+            machine learning and AI to solve your business challenges.
+          </p>
+
+          <div className="grid md:grid-cols-4 gap-4 mb-10">
+            {[
+              { Icon: Mail, label: 'Email', value: 'tahashah366@gmail.com', href: 'mailto:tahashah366@gmail.com' },
+              { Icon: Phone, label: 'Phone', value: '+92 341 2188932', href: 'tel:+923412188932' },
+              { Icon: Linkedin, label: 'LinkedIn', value: 'TAHASHAH12', href: 'https://linkedin.com/in/TAHASHAH12' },
+              { Icon: MapPin, label: 'Location', value: 'Karachi, Pakistan', href: null },
+            ].map(({ Icon, label, value, href }) => (
+              <div key={label} className="p-5 rounded-xl transition-all duration-300"
+                style={{ background: bgCard, border: `1px solid ${borderBase}` }}
+                onMouseEnter={e => { e.currentTarget.style.borderColor = `${cyan}40`; e.currentTarget.style.boxShadow = `0 0 16px rgba(0,212,255,0.06)`; }}
+                onMouseLeave={e => { e.currentTarget.style.borderColor = borderBase; e.currentTarget.style.boxShadow = 'none'; }}>
+                <Icon className="h-6 w-6 mx-auto mb-3" style={{ color: cyan }} />
+                <p className="font-mono text-xs mb-1" style={{ color: textDim }}>{label}</p>
+                {href ? (
+                  <a href={href} target={href.startsWith('http') ? '_blank' : '_self'} rel="noopener noreferrer"
+                    className="text-xs font-semibold transition-colors" style={{ color: textMain }}
+                    onMouseEnter={e => e.target.style.color = cyan}
+                    onMouseLeave={e => e.target.style.color = textMain}>
+                    {value}
+                  </a>
+                ) : (
+                  <p className="text-xs font-semibold" style={{ color: textMain }}>{value}</p>
+                )}
+              </div>
+            ))}
+          </div>
+
+          <a href="mailto:tahashah366@gmail.com"
+            className="inline-flex items-center gap-2 px-10 py-4 rounded font-mono font-semibold text-sm transition-all duration-300"
+            style={{
+              background: `rgba(0,212,255,0.07)`,
+              border: `1px solid ${cyan}`,
+              color: cyan,
+              boxShadow: `0 0 20px rgba(0,212,255,0.12)`,
+            }}
+            onMouseEnter={e => e.currentTarget.style.boxShadow = `0 0 35px rgba(0,212,255,0.28)`}
+            onMouseLeave={e => e.currentTarget.style.boxShadow = `0 0 20px rgba(0,212,255,0.12)`}>
+            <Mail className="h-4 w-4" /> send_message()
+          </a>
+        </div>
+      </section>
+
+      {/* ── FOOTER ─────────────────────────────── */}
+      <footer className="py-5 px-6 text-center font-mono text-xs"
+        style={{
+          background: darkMode ? '#030810' : '#1e293b',
+          color: darkMode ? '#374151' : '#94a3b8',
+          borderTop: `1px solid ${darkMode ? 'rgba(0,212,255,0.08)' : 'rgba(255,255,255,0.08)'}`,
+        }}>
+        <span style={{ color: cyan }}>©</span> 2025 Taha Shah
+        <span style={{ margin: '0 8px', opacity: 0.4 }}>|</span>
+        <span>Built with React &amp; Tailwind</span>
       </footer>
     </div>
   );
